@@ -24,7 +24,7 @@ const nameToSocket = new Map(); // 이름으로 소켓 검색 시 사용
 const sendMessage = (data, senderSocket) => {
   const senderName = users.get(senderSocket)?.name;
   for (const socket of users.keys()) {
-    // if (socket === senderSocket) continue;
+    if (socket === senderSocket) continue;
     socket.send(
       JSON.stringify({
         type: "message",
@@ -75,7 +75,6 @@ wss.on("connection", (socket) => {
 
   socket.on("message", (data) => {
     const parsedData = JSON.parse(data.toString("utf8"));
-    console.log(parsedData);
     switch (parsedData.type) {
       case "name":
         addUser(parsedData, socket);

@@ -1,6 +1,8 @@
 const messageList = document.querySelector("#messageList");
 const messageForm = document.querySelector("#mesaageForm");
 const nameForm = document.querySelector("#saveNameForm");
+const saveNameArea = document.querySelector("#saveName");
+const chatArea = document.querySelector("#chat");
 let name;
 
 const socket = new WebSocket(`ws://${window.location.host}`);
@@ -44,6 +46,8 @@ socket.addEventListener("message", (event) => {
   } else if (type === "addName_success") {
     alert("채팅가능");
     nameForm.querySelector("input").value = "";
+    saveNameArea.style.display = "none";
+    chatArea.style.display = "block";
   }
 });
 
@@ -51,14 +55,15 @@ const handleSubmit = (evnet) => {
   event.preventDefault();
   const input = messageForm.querySelector("input");
   socket.send(makeMessageObj("message", input.value, name));
+  const li = document.createElement("li");
+  li.innerHTML = "You : " + input.value;
+  messageList.appendChild(li);
   input.value = "";
-  console.log("handleSubmit");
 };
 const handleName = (event) => {
   event.preventDefault();
   name = nameForm.querySelector("input").value;
   socket.send(makeNameObj("name", name));
-  console.log("handleName");
 };
 
 messageForm.addEventListener("submit", handleSubmit);
