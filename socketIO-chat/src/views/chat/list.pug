@@ -1,0 +1,11 @@
+extends ../layout/base.pug
+block content
+    main
+        div#createRoom
+            form
+                input(placeholder="방 이름",required, type="text")
+                button 생성하기
+        div(style="display:flex")
+            p 목록
+            button#refreshBtn(style="width:200px;") 새로고침
+        div#roomList
