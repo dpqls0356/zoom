@@ -39,20 +39,26 @@ export const kakaoLogin = async (code) => {
     // 3. DB 조회
     let user = await userModel.findByKakaoId(kakaoId);
 
-    // 4. 없으면 회원가입
-    if (!user) {
-      user = await userModel.create({
-        kakaoId,
-        nickname,
-        profile_url: profileUrl,
-      });
+    if (user) {
+      return [
+        true,
+        {
+          id: user.id,
+          user_id: user.user_id,
+          profile_url: user.profile_url,
+          nickname: user.nickname,
+        },
+      ];
+    } else {
+      return [
+        false,
+        {
+          kakao_id: kakaoId,
+          profile_url: profileUrl,
+          nickname: nickname,
+        },
+      ];
     }
-
-    return {
-      id: user.id,
-      nickname: user.nickname,
-      profile_url: user.profile_url,
-    };
   } catch (err) {
     console.log(err);
     throw err;

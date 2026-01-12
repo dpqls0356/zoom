@@ -1,0 +1,17 @@
+extends ../layout/base.pug
+block content
+    div 
+        div 가입하기
+        form(method="POST" action="/auth/join")
+            div
+                img(style="width:100px; height:100px;" src=kakao.profile_url alt="카카오 프로필")
+                input(id="profile_url" name="profile_url" type="file" src=kakao.profile_url)
+            div(style="display:none")
+                input(id="kakao_id"  name="kakao_id" type ="text" required value=kakao.kakao_id)
+            div
+                label(for="nickname") 닉네임
+                input(id="nickname" name="nickname" type="text" placeholder="닉네임을 입력하세요" required value=kakao.nickname)
+            div
+                label(for="user_id") 아이디
+                input(id="user_id" name="user_id" type="text" placeholder="id를 입력하세요" required)
+            button#join-btn 가입하기

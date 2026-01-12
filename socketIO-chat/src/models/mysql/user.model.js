@@ -11,16 +11,16 @@ export const findByKakaoId = async (kakaoId) => {
   }
 };
 
-export const create = async ({ kakaoId, nickname, profile_url }) => {
+export const create = async ({ userId, kakaoId, nickname, profile_url }) => {
   const [result] = await db.query(
-    "INSERT INTO users (kakao_id, nickname,profile_url) VALUES (?, ?,?)",
-    [kakaoId, nickname, profile_url]
+    "INSERT INTO users (user_id,kakao_id, nickname,profile_url) VALUES (?,?, ?,?)",
+    [userId, kakaoId, nickname, profile_url]
   );
 
   return {
-    id: result.insertId,
-    kakaoId,
-    nickname,
+    id: result.id,
+    user_id: result.user_id,
     profile_url,
+    nickname,
   };
 };
