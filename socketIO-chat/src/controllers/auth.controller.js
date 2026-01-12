@@ -1,4 +1,5 @@
 import * as authService from "../services/auth.service.js";
+import jwt from "jsonwebtoken";
 
 export const loginPage = (req, res) => {
   res.render("auth/login");
@@ -22,7 +23,24 @@ export const kakaoCallback = async (req, res, next) => {
     // 토큰 요청해서 정보 받아오기
     const user = await authService.kakaoLogin(code);
 
-    req.session.user = user;
+    // jwt으로 변경 후 미사용
+    // req.session.user = user;
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        nickname: user.nickname,
+        profile_url: user.profile_url,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("access_token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    });
 
     res.redirect("/list");
   } catch (err) {

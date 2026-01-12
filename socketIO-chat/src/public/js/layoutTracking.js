@@ -8,7 +8,6 @@ const MAX_WIDTH = 510;
 const observer = new ResizeObserver((entries) => {
   for (const entry of entries) {
     const width = entry.contentRect.width;
-    console.log(width);
     if (width < MIN_WIDTH || width > MAX_WIDTH) {
       resizeAlarm.style.display = "flex";
       layoutBlock.style.display = "none";
