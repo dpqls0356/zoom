@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 export const jwtAuth = (req, res, next) => {
   const token = req.cookies.access_token;
-  console.log("JWTAUTH / access_token => " + token);
+  // console.log(token);
+  // console.log(req.cookies);
   if (!token) {
     return res.redirect("/auth/login");
   }

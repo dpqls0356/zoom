@@ -10,7 +10,7 @@ export const findByKakaoId = async (kakaoId) => {
     console.log(error);
   }
 };
-
+//insert의 결과에는 생성객체는 포함되지않음
 export const create = async ({ userId, kakaoId, nickname, profile_url }) => {
   const [result] = await db.query(
     "INSERT INTO users (user_id,kakao_id, nickname,profile_url) VALUES (?,?, ?,?)",
@@ -18,9 +18,16 @@ export const create = async ({ userId, kakaoId, nickname, profile_url }) => {
   );
 
   return {
-    id: result.id,
-    user_id: result.user_id,
-    profile_url,
+    id: result.insertId,
+    user_id: userId,
+    kakao_id: kakaoId,
     nickname,
+    profile_url,
   };
+};
+
+export const logout = async (refreshToken) => {
+  await db.query("UPDATE refresh_tokens SET revoked = true WHERE token = ?", [
+    refreshToken,
+  ]);
 };

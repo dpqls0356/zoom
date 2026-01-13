@@ -1,7 +1,7 @@
 import * as authService from "../services/auth.service.js";
 import jwt from "jsonwebtoken";
 import * as userModel from "../models/mysql/user.model.js";
-import { compileString } from "sass";
+import { setAuthCookies } from "../utils/cookie.util.js";
 
 export const loginPage = (req, res) => {
   res.render("auth/login");
@@ -17,7 +17,13 @@ export const joinPage = (req, res) => {
     return res.redirect("/auth/login"); // 토큰 만료/위조 시
   }
 
-  res.render("auth/join", { kakao: kakaoUser });
+  res.render("auth/join", {
+    kakao: {
+      kakaoId: kakaoUser.id,
+      profileUrl: kakaoUser.properties.profile_image,
+      nickname: kakaoUser.properties.nickname,
+    },
+  });
 };
 
 // 인가 코드 요청
@@ -36,49 +42,25 @@ export const kakaoCallback = async (req, res, next) => {
   try {
     const code = req.query.code;
     // 토큰 요청해서 정보 받아오기
-    const [isUser, info] = await authService.kakaoLogin(code);
+    const result = await authService.kakaoLogin(code, {
+      userAgent: req.headers["user-agent"],
+      ip: req.ip, //리프레시 토큰 저장할 때 필요
+    });
 
-    // jwt으로 변경 후 미사용
-    // req.session.user = user;
-    if (isUser) {
-      const token = jwt.sign(
-        {
-          id: info.id,
-          user_id: info.user_id,
-          nickname: info.nickname,
-          profile_url: info.profile_url,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
-      );
-
-      res.cookie("access_token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+    if (result.type === "LOGIN_SUCCESS") {
+      setAuthCookies(res, result.payload);
+      return res.redirect("/list");
+    } else if (result.type === "NEED_JOIN") {
+      const tempToken = jwt.sign(result.payload, process.env.JWT_SECRET, {
+        expiresIn: "10m",
       });
-
-      res.redirect("/list");
-    } else {
-      // 임시 JWT 생성 (짧은 만료)
-      const tempToken = jwt.sign(
-        {
-          kakao_id: info.kakao_id,
-          profile_url: info.profile_url,
-          nickname: info.nickname,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "10m" }
-      );
-
-      // 임시 쿠키에 저장
       res.cookie("kakao_temp", tempToken, {
         httpOnly: true,
         sameSite: "lax",
         path: "/auth/join",
       });
 
-      return res.redirect("/auth/join"); // 주소도 바뀌고 새로고침 안전
+      res.redirect("/auth/join");
     }
   } catch (err) {
     next(err);
@@ -86,34 +68,28 @@ export const kakaoCallback = async (req, res, next) => {
 };
 
 export const join = async (req, res, next) => {
-  const { kakao_id, nickname, user_id, profile_url } = req.body;
+  const { kakaoId, nickname, userId, profileUrl } = req.body;
   try {
-    const user = await userModel.create({
-      userId: user_id,
-      kakaoId: kakao_id,
-      nickname,
-      profile_url,
-    });
-    if (user) {
-      const token = jwt.sign(
-        {
-          id: user.id,
-          user_id: user.user_id,
-          nickname: user.nickname,
-          profile_url: user.profile_url,
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
-      );
-
-      res.cookie("access_token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-      });
-      return res.redirect("/list");
-    }
+    const result = await authService.join(
+      { kakaoId, nickname, userId, profileUrl },
+      {
+        userAgent: req.headers["user-agent"],
+        ip: req.ip, //리프레시 토큰 저장할 때 필요
+      }
+    );
+    setAuthCookies(res, result);
+    return res.redirect("/list");
   } catch (err) {
     console.log(err);
   }
+};
+
+export const logout = async (req, res) => {
+  const refreshToken = req.cookies.refresh_token;
+  if (refreshToken) {
+    userModel.logout(refreshToken);
+  }
+  res.clearCookie("access_token");
+  res.clearCookie("refresh_token");
+  res.redirect("/auth/login");
 };

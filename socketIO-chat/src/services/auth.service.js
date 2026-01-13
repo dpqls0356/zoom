@@ -1,7 +1,8 @@
 import axios from "axios";
 import * as userModel from "../models/mysql/user.model.js";
+import * as tokenService from "../services/token.service.js";
 
-export const kakaoLogin = async (code) => {
+export const kakaoLogin = async (code, meta) => {
   try {
     // 1. 토큰 발급
     const tokenRes = await axios.post(
@@ -24,43 +25,38 @@ export const kakaoLogin = async (code) => {
     const accessToken = tokenRes.data.access_token;
 
     // 2. 유저 정보 조회
-    const userRes = await axios.get("https://kapi.kakao.com/v2/user/me", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const { data: kakaoUser } = await axios.get(
+      "https://kapi.kakao.com/v2/user/me",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
 
-    const kakaoUser = userRes.data;
-
-    const kakaoId = kakaoUser.id;
-    const nickname = kakaoUser.kakao_account.profile.nickname;
-    const profileUrl =
-      kakaoUser.kakao_account?.profile?.profile_image_url ?? null;
     // 3. DB 조회
-    let user = await userModel.findByKakaoId(kakaoId);
+    let user = await userModel.findByKakaoId(kakaoUser.kakao_id);
 
-    if (user) {
-      return [
-        true,
-        {
-          id: user.id,
-          user_id: user.user_id,
-          profile_url: user.profile_url,
-          nickname: user.nickname,
-        },
-      ];
-    } else {
-      return [
-        false,
-        {
-          kakao_id: kakaoId,
-          profile_url: profileUrl,
-          nickname: nickname,
-        },
-      ];
+    if (!user) {
+      return {
+        type: "NEED_JOIN",
+        payload: kakaoUser,
+      };
     }
+    // 토큰 생성해서 반환하기
+    const tokens = await tokenService.createToken(user, meta);
+    return {
+      type: "LOGIN_SUCCESS",
+      payload: tokens,
+    };
   } catch (err) {
     console.log(err);
     throw err;
   }
+};
+
+export const join = async (joinData, meta) => {
+  const user = await userModel.create(joinData);
+  const tokens = await tokenService.createToken(user, meta);
+  return tokens;
 };
