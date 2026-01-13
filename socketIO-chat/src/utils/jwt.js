@@ -11,7 +11,7 @@ export const generateAccessToken = (user) => {
       profile_url: user.profile_url,
     },
     process.env.JWT_SECRET,
-    { expiresIn: "24h" }
+    { expiresIn: "10m" }
   );
 };
 

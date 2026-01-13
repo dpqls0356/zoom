@@ -10,6 +10,14 @@ export const findByKakaoId = async (kakaoId) => {
     console.log(error);
   }
 };
+export const findById = async (userId) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM users WHERE id = ?", [userId]);
+    return rows[0];
+  } catch (err) {
+    console.log(err);
+  }
+};
 //insert의 결과에는 생성객체는 포함되지않음
 export const create = async ({ userId, kakaoId, nickname, profile_url }) => {
   const [result] = await db.query(

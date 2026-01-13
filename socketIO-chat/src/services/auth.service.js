@@ -34,8 +34,9 @@ export const kakaoLogin = async (code, meta) => {
       }
     );
 
+    // console.log(kakaoUser);
     // 3. DB 조회
-    let user = await userModel.findByKakaoId(kakaoUser.kakao_id);
+    let user = await userModel.findByKakaoId(kakaoUser.id);
 
     if (!user) {
       return {

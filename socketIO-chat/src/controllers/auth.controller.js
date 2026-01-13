@@ -1,4 +1,5 @@
 import * as authService from "../services/auth.service.js";
+import * as tokenService from "../services/token.service.js";
 import jwt from "jsonwebtoken";
 import * as userModel from "../models/mysql/user.model.js";
 import { setAuthCookies } from "../utils/cookie.util.js";
@@ -92,4 +93,27 @@ export const logout = async (req, res) => {
   res.clearCookie("access_token");
   res.clearCookie("refresh_token");
   res.redirect("/auth/login");
+};
+
+export const refresh = async (req, res) => {
+  const refreshToken = req.cookies.refresh_token;
+
+  if (!refreshToken) {
+    return res.redirect("/auth/login");
+  }
+  // db에 리프레시 토큰이 있는지 확인
+  const result = await tokenService.verifyAndRotateToken(refreshToken, {
+    userAgent: req.headers["user-agent"],
+    ip: req.ip, //리프레시 토큰 저장할 때 필요
+  });
+  if (result.type === "Fail") {
+    console.log(result.message);
+    return res.redirect("/auth/login");
+  }
+  // console.log("verifyAndRotateToken result : ", result.type);
+  setAuthCookies(res, result);
+  const redirectUrl = req.query.redirect?.startsWith("/")
+    ? req.query.redirect
+    : "/list";
+  res.redirect(redirectUrl);
 };

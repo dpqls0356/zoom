@@ -6,6 +6,7 @@ const router = Router();
 router.get("/join", authController.joinPage);
 router.post("/join", authController.join);
 router.get("/login", authController.loginPage);
+router.get("/refresh", authController.refresh);
 router.get("/kakao", authController.kakaoLogin);
 router.get("/kakao/callback", authController.kakaoCallback);
 
