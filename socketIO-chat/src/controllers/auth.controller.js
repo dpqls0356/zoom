@@ -110,7 +110,10 @@ export const refresh = async (req, res) => {
     console.log(result.message);
     return res.redirect("/auth/login");
   }
-  // console.log("verifyAndRotateToken result : ", result.type);
+  // console.log("before access Token: ", req.cookies.access_token);
+  // console.log("before refresh Token: ", req.cookies.refresh_token);
+  // console.log("verifyAndRotateToken  : ", result.accessToken);
+  // console.log("verifyAndRotateToken  : ", result.refreshToken);
   setAuthCookies(res, result);
   const redirectUrl = req.query.redirect?.startsWith("/")
     ? req.query.redirect

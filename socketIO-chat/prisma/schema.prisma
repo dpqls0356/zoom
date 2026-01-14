@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_URL")
+}
+
+
+model chat_rooms {
+  id              BigInt            @id @default(autoincrement())
+  owner_id        BigInt
+  max_users       Int
+  tag             String?           @db.VarChar(50)
+  created_at      DateTime?         @default(now()) @db.DateTime(0)
+  users           users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
+  user_chat_rooms user_chat_rooms[]
+
+  @@index([owner_id], map: "fk_chat_rooms_owner")
+}
+
+model refresh_tokens {
+  id         BigInt    @id @default(autoincrement())
+  user_id    BigInt
+  token      String    @db.VarChar(255)
+  user_agent String?   @db.VarChar(255)
+  ip_address String?   @db.VarChar(45)
+  expires_at DateTime  @db.DateTime(0)
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  revoked    Boolean?  @default(false)
+  users      users     @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "refresh_tokens_ibfk_1")
+
+  @@index([user_id], map: "user_id")
+}
+
+model user_chat_rooms {
+  user_id    BigInt
+  room_id    BigInt
+  joined_at  DateTime?  @default(now()) @db.DateTime(0)
+  chat_rooms chat_rooms @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_ucr_room")
+  users      users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_ucr_user")
+
+  @@id([user_id, room_id])
+  @@index([room_id], map: "fk_ucr_room")
+}
+
+model users {
+  id              BigInt            @id @default(autoincrement())
+  kakao_id        String            @unique(map: "kakao_id") @db.VarChar(50)
+  nickname        String            @db.VarChar(50)
+  profile_url     String?           @db.VarChar(255)
+  created_at      DateTime?         @default(now()) @db.DateTime(0)
+  user_id         String            @unique(map: "user_id") @db.VarChar(50)
+  chat_rooms      chat_rooms[]
+  refresh_tokens  refresh_tokens[]
+  user_chat_rooms user_chat_rooms[]
+}
