@@ -1,0 +1,52 @@
+@use "../base/variables" as v;
+.chatroom-list {
+  padding: 0px 20px;
+  flex: 1;
+  .chatroom-serch {
+    width: 100%;
+    height: 50px;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    background-color: #fcf6f6c1;
+    border-radius: 15px;
+    .serch-icon {
+      color: v.$gray;
+    }
+    input {
+      font-weight: 600;
+      font-size: 15px;
+      flex: 1;
+      padding-left: 10px;
+      border: none;
+      background-color: inherit;
+    }
+  }
+  .toggle {
+    padding: 40px 0px;
+    .toggle-text {
+      display: flex;
+      & > div {
+        flex: 1;
+        margin-bottom: 2px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: v.$gray;
+        font-weight: 800;
+        position: relative; // 자식 dot 위치 기준
+      }
+      .focus {
+        color: v.$purple;
+      }
+    }
+    .toggle-dot {
+      position: absolute;
+      height: 5px;
+      width: 5px;
+      border-radius: 50%;
+      background-color: v.$purple;
+      transition: left 0.3s ease;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+extends ../layout/base.pug
+block header
+    include ../partials/header/createChatRoomHeader.pug
+block content
+    form.create-chatroom(method="post" action="/chat/create")
+        div.chatroom-image
+            label.chatroom-image__label
+                img.image(
+                src="/img/chat_room_default_img.png",
+                alt="default image"
+                )
+                input.chatroom-image__input(name="roomProfileUrl" id="room_profile_url" type="file" accept="image/*")
+        div.input
+            input.chatroom-name(
+               name="roomName" type="text" required placeholder="Enter chat room name... ")
+        div.input
+            input.chatroom-tag(name="roomTag" type="text" placeholder="Enter tags for search...")
+        div.input
+        div.chatroom-select
+            input(type="hidden" name="max_person" id="maxPerson")
+            button.chatroom-select__trigger(type="button") Select participants
+            ul.chatroom-select__list.is-close
+                - for (let i = 2; i <= 50; i++)
+                    li.chatroom-select__option(data-value=i)= i
+    script(src="/js/headers/createChatHeader.js")
+    script(src="/js/chat/createChat.js")

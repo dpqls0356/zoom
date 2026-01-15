@@ -1,0 +1,10 @@
+$bg-start: #f7ece8;
+$bg-middle: #e1e7fd;
+$bg-end: #dcd9f8;
+.background--base {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(to bottom, $bg-start, $bg-middle, $bg-end);
+}

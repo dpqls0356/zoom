@@ -1,0 +1,33 @@
+@use "../../base/variables" as v;
+.header--default {
+  color: v.$black;
+  padding: 0px 20px;
+  display: flex;
+  height: 100px;
+  align-items: center;
+
+  .header-purple {
+    color: v.$purple;
+  }
+  .header-text {
+    font-weight: 800;
+  }
+  .left {
+    flex: 0.5;
+  }
+  .middle {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    .header__title {
+      font-size: v.$header_title_font_size;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+  }
+  .right {
+    flex: 0.5;
+    display: flex;
+    justify-content: end;
+  }
+}

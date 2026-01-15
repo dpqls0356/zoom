@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 import indexRouter from "./routes/index.js";
 import authRouter from "./routes/auth.routes.js";
+import chatRouter from "./routes/chat.routes.js";
 
 import { jwtAuth } from "./middlewares/auth.middleware.js";
 
@@ -41,4 +42,5 @@ app.use((req, res, next) => {
 });
 app.use("/", indexRouter);
 app.use("/auth", authRouter);
+app.use("/chat", chatRouter);
 export default app;
