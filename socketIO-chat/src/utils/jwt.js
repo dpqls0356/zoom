@@ -19,3 +19,8 @@ export const generateAccessToken = (user) => {
 export const generateRefreshToken = () => {
   return crypto.randomBytes(64).toString("hex"); // 길고 예측 불가
 };
+
+export const getUserInfo = (token) => {
+  const user = jwt.verify(token, process.env.JWT_SECRET);
+  return user;
+};

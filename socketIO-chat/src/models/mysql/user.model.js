@@ -19,10 +19,16 @@ export const findById = async (userId) => {
   }
 };
 //insert의 결과에는 생성객체는 포함되지않음
-export const create = async ({ userId, kakaoId, nickname, profile_url }) => {
+export const create = async ({
+  id,
+  userId,
+  kakaoId,
+  nickname,
+  profile_url,
+}) => {
   const [result] = await db.query(
-    "INSERT INTO users (user_id,kakao_id, nickname,profile_url) VALUES (?,?, ?,?)",
-    [userId, kakaoId, nickname, profile_url]
+    "INSERT INTO users (id,user_id,kakao_id, nickname,profile_url) VALUES (?,?,?, ?,?)",
+    [id, userId, kakaoId, nickname, profile_url]
   );
 
   return {

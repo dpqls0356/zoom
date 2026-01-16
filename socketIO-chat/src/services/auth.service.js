@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as userModel from "../models/mysql/user.model.js";
 import * as tokenService from "../services/token.service.js";
-
+import crypto from "crypto";
 export const kakaoLogin = async (code, meta) => {
   try {
     // 1. 토큰 발급
@@ -57,7 +57,8 @@ export const kakaoLogin = async (code, meta) => {
 };
 
 export const join = async (joinData, meta) => {
-  const user = await userModel.create(joinData);
+  const id = crypto.randomBytes(64).toString("hex");
+  const user = await userModel.create({ id, ...joinData });
   const tokens = await tokenService.createToken(user, meta);
   return tokens;
 };

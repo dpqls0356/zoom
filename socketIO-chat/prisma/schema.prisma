@@ -8,21 +8,21 @@ datasource db {
 }
 
 model chat_rooms {
-  id              BigInt            @id @default(autoincrement())
-  owner_id        BigInt
-  max_users       Int
-  tag             String?           @db.VarChar(50)
-  created_at      DateTime?         @default(now()) @db.DateTime(0)
-  profile_url     String?           @db.VarChar(255)
-  users           users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
-  user_chat_rooms user_chat_rooms[]
+  id           String            @id @db.Char(128)
+  owner_id     String            @db.Char(128)
+  max_users    Int
+  tag          String?           @db.VarChar(50)
+  created_at   DateTime?         @default(now()) @db.DateTime(0)
+  profile_url  String?           @db.VarChar(255)
+  owner        users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
+  participants user_chat_rooms[]
 
   @@index([owner_id], map: "fk_chat_rooms_owner")
 }
 
 model refresh_tokens {
   id         BigInt    @id @default(autoincrement())
-  user_id    BigInt
+  user_id    String    @db.Char(128)
   token      String    @db.VarChar(255)
   user_agent String?   @db.VarChar(255)
   ip_address String?   @db.VarChar(45)
@@ -31,22 +31,22 @@ model refresh_tokens {
   revoked    Boolean?  @default(false)
   users      users     @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "refresh_tokens_ibfk_1")
 
-  @@index([user_id], map: "user_id")
+  @@index([user_id], map: "refresh_tokens_ibfk_1")
 }
 
 model user_chat_rooms {
-  user_id    BigInt
-  room_id    BigInt
+  user_id    String     @db.Char(128)
+  room_id    String     @db.Char(128)
   joined_at  DateTime?  @default(now()) @db.DateTime(0)
   chat_rooms chat_rooms @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_ucr_room")
-  users      users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_ucr_user")
+  user       users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_ucr_user")
 
   @@id([user_id, room_id])
   @@index([room_id], map: "fk_ucr_room")
 }
 
 model users {
-  id              BigInt            @id @default(autoincrement())
+  id              String            @id @db.Char(128)
   kakao_id        String            @unique(map: "kakao_id") @db.VarChar(50)
   nickname        String            @db.VarChar(50)
   profile_url     String?           @db.VarChar(255)
