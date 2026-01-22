@@ -8,15 +8,16 @@ datasource db {
 }
 
 model chat_rooms {
-  id           String            @id @db.Char(128)
-  owner_id     String            @db.Char(128)
-  max_users    Int
-  tag          String?           @db.VarChar(50)
-  created_at   DateTime?         @default(now()) @db.DateTime(0)
-  profile_url  String?           @db.VarChar(255)
-  room_name    String            @db.VarChar(50)
-  owner        users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
-  participants user_chat_rooms[]
+  id                    String            @id @db.Char(128)
+  owner_id              String            @db.Char(128)
+  max_users             Int
+  tag                   String?           @db.VarChar(50)
+  created_at            DateTime?         @default(now()) @db.DateTime(0)
+  profile_url           String?           @db.VarChar(255)
+  room_name             String            @db.VarChar(50)
+  number_of_participant Int               @default(0)
+  owner                 users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
+  participants          user_chat_rooms[]
 
   @@index([owner_id], map: "fk_chat_rooms_owner")
 }

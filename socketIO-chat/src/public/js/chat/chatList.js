@@ -6,6 +6,7 @@ const toggleDot = document.querySelector(".toggle-dot");
 const searchInput = document.querySelector(".chatroom-serch input");
 const JOINED = "joined";
 const AVAILABLE = "available";
+
 // 검색어가 바뀔 때 검색어에 맞는 방 리스트 보여주기
 searchInput.addEventListener("change", () => {});
 
@@ -56,11 +57,11 @@ const getRoomList = async (type) => {
 
 function renderRooms(rooms, type) {
   const emptybox = document.querySelector(".empty");
-  const listbox = document.querySelector(".room-list");
+  const roomList = document.querySelector(".room-list");
   console.log(rooms.length);
   if (rooms.length === 0) {
     emptybox.classList.remove("none");
-    listbox.classList.add("none");
+    roomList.classList.add("none");
     if (type === JOINED) {
       emptybox.innerHTML = "<div class='empty'>참여한 채팅방이 없습니다.</div>";
     } else {
@@ -70,8 +71,24 @@ function renderRooms(rooms, type) {
     return;
   }
   emptybox.classList.add("none");
-  listbox.classList.remove("none");
-  listbox.innerHTML = rooms.map((room) => roomTemplate(room, type)).join("");
+  roomList.classList.remove("none");
+  roomList.innerHTML = rooms.map((room) => roomTemplate(room, type)).join("");
+
+  const els = document.querySelectorAll(".room-content");
+  els.forEach((el) => {
+    el.addEventListener("click", (event) => {
+      // 클릭된 요소가 어디든 상관없이
+      const roomContent = event.target.closest(".room-content");
+
+      // room-content 바깥을 눌렀으면 무시
+      if (!roomContent || !roomList.contains(roomContent)) return;
+
+      const roomId = roomContent.dataset.id;
+      if (!roomId) return;
+
+      window.location.href = `/chat/${roomId}`;
+    });
+  });
 }
 
 function roomTemplate(room, type) {
@@ -83,7 +100,7 @@ function roomTemplate(room, type) {
         <div class="header">
             <div class="name">${room.room_name}</div>
             <div class="person">
-                <span>1/${room.max_users}</span>
+                <span>${room.number_of_participant} / ${room.max_users}</span>
             </div>
         </div>
         <div class="not-read-dot"></div>

@@ -1,5 +1,5 @@
 const header = document.querySelector(".header__title");
-header.innerHTML = "create Room";
+header.innerHTML = "Create Room";
 
 const closeBtn = document.querySelector(".closeBtn");
 closeBtn.addEventListener("click", () => {

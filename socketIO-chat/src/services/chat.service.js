@@ -8,7 +8,7 @@ export const createRoom = async (roomData) => {
   const result = await prisma.$transaction(async (tx) => {
     //채팅방 만들기
     const room = await tx.chat_rooms.create({
-      data: { id, ...roomData },
+      data: { id, ...roomData, number_of_participant: 1 },
     });
     if (room) {
       //유저에게 연결
