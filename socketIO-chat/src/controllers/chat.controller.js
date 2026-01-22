@@ -14,6 +14,7 @@ export const createRoom = async (req, res) => {
   }
 
   const param = {
+    room_name: roomData.roomName,
     owner_id: user.id,
     max_users: Number(roomData.maxPerson),
     tag: roomData.roomTag,
@@ -37,8 +38,38 @@ export const enterRoom = async (req, res) => {
   switch (message.status) {
     case 403:
       alert(message.message);
-      return res.render("/list");
+      return res.redirect("/chat/list");
     case 200:
-      return res.render(`/chat/room`, { messages: message.messages });
+      return res.render(`chat/room`, {
+        messages: message.messages,
+        participants: message.participants,
+        roomInfo: message.roomInfo,
+      });
   }
+};
+
+export const getRoomList = async (req, res) => {
+  const rooms = await chatService.searchRoomList({
+    type: "joined",
+    userId: req.cookies.userId,
+  });
+  return res.render("chat/list", {
+    rooms,
+    type: "joined",
+    user: req.user,
+    headerTitle: "Message",
+  });
+};
+
+export const searchRoomList = async (req, res) => {
+  const { type, searchWord } = req.query;
+  const userId = req.cookies.userId;
+
+  const rooms = await chatService.searchRoomList({
+    type,
+    searchWord,
+    userId,
+  });
+
+  return res.status(200).send({ success: true, type, rooms });
 };

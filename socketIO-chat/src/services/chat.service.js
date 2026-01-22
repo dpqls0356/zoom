@@ -43,6 +43,25 @@ export const enterRoom = async ({ userId, roomId }) => {
       message: "Not a participant",
     };
   }
+
+  const participants = await prisma.user_chat_rooms.findMany({
+    where: { room_id: roomId },
+    include: {
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profile_url: true,
+        },
+      },
+    },
+  });
+
+  const roomInfo = await prisma.chat_rooms.findUnique({
+    where: {
+      id: roomId,
+    },
+  });
   const messages = await Message.find({
     roomId,
     createdAt: { $gte: joinInfo.joined_at },
@@ -54,6 +73,43 @@ export const enterRoom = async ({ userId, roomId }) => {
   console.log("messages ", messages);
   return {
     status: 200,
+    participants: participants.map((p) => p.user),
     messages,
+    roomInfo,
   };
+};
+export const searchRoomList = async ({ type, searchWord, userId }) => {
+  switch (type) {
+    case "joined": {
+      // const rooms = await prisma.user_chat_rooms.findMany({
+      //   where: {
+      //     user_id: userId,
+      //     chat_rooms: {
+      //       name: { // 해당 컬럼에 검색어가 포함되어있는가
+      //         contains: searchWord,
+      //       },
+      //     },
+      //   },
+      //   include: {
+      //     chat_rooms: true,
+      //   },
+      // });
+      const rooms = await prisma.chat_rooms.findMany({
+        where: {
+          room_name: { contains: searchWord },
+          participants: { some: { user_id: userId } },
+        },
+      });
+      return rooms;
+    }
+    case "available": {
+      const rooms = await prisma.chat_rooms.findMany({
+        where: {
+          room_name: { contains: searchWord },
+          participants: { none: { user_id: userId } },
+        },
+      });
+      return rooms;
+    }
+  }
 };

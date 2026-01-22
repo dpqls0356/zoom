@@ -50,7 +50,7 @@ export const kakaoCallback = async (req, res, next) => {
 
     if (result.type === "LOGIN_SUCCESS") {
       setAuthCookies(res, result.payload);
-      return res.redirect("/list");
+      return res.redirect("/chat/list");
     } else if (result.type === "NEED_JOIN") {
       const tempToken = jwt.sign(result.payload, process.env.JWT_SECRET, {
         expiresIn: "10m",
@@ -76,10 +76,10 @@ export const join = async (req, res, next) => {
       {
         userAgent: req.headers["user-agent"],
         ip: req.ip, //리프레시 토큰 저장할 때 필요
-      }
+      },
     );
     setAuthCookies(res, result);
-    return res.redirect("/list");
+    return res.redirect("/chat/list");
   } catch (err) {
     console.log(err);
   }
@@ -117,6 +117,6 @@ export const refresh = async (req, res) => {
   setAuthCookies(res, result);
   const redirectUrl = req.query.redirect?.startsWith("/")
     ? req.query.redirect
-    : "/list";
+    : "/chat/list";
   res.redirect(redirectUrl);
 };

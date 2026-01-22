@@ -14,6 +14,7 @@ model chat_rooms {
   tag          String?           @db.VarChar(50)
   created_at   DateTime?         @default(now()) @db.DateTime(0)
   profile_url  String?           @db.VarChar(255)
+  room_name    String            @db.VarChar(50)
   owner        users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
   participants user_chat_rooms[]
 
@@ -31,7 +32,7 @@ model refresh_tokens {
   revoked    Boolean?  @default(false)
   users      users     @relation(fields: [user_id], references: [id], onUpdate: Restrict, map: "refresh_tokens_ibfk_1")
 
-  @@index([user_id], map: "refresh_tokens_ibfk_1")
+  @@index([user_id], map: "fk_refresh_tokens_user")
 }
 
 model user_chat_rooms {

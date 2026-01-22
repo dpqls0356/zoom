@@ -3,7 +3,7 @@ header.innerHTML = "create Room";
 
 const closeBtn = document.querySelector(".closeBtn");
 closeBtn.addEventListener("click", () => {
-  window.location.href = "/list";
+  window.location.href = "/chat/list";
 });
 
 const createChatRoomBtn = document.querySelector(".right div");

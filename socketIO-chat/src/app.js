@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import indexRouter from "./routes/index.js";
 import authRouter from "./routes/auth.routes.js";
 import chatRouter from "./routes/chat.routes.js";
-
+import apiRouter from "./routes/api.routes.js";
 import { jwtAuth } from "./middlewares/auth.middleware.js";
 
 // .env 파일에 정의된 환경변수를 process.env로 로드
@@ -41,6 +41,7 @@ app.use((req, res, next) => {
   return jwtAuth(req, res, next);
 });
 app.use("/", indexRouter);
+app.use("/api", apiRouter);
 app.use("/auth", authRouter);
 app.use("/chat", chatRouter);
 export default app;

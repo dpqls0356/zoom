@@ -14,9 +14,11 @@ block content
                 div.available
                     span Available
             div.toggle-dot
-        div#roomList
+        div.scroll-y-hidden.room-list#list
+        div.empty
         //- 데이터 없으면 x
         //- 있으면 list 보여주기
-    script(src="/js/chat/chatList.js")
+    script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")
+    script(type="module" src="/js/chat/chatList.js")
     script(src="/js/headers/chatRoomListHeader.js")
 
