@@ -1,5 +1,7 @@
 import http from "http";
 import dotenv from "dotenv";
+import cookie from "cookie";
+import jwt from "jsonwebtoken";
 import app from "./app.js";
 import { connectMongoDB } from "./config/mongodb";
 import { Server } from "socket.io";
@@ -11,6 +13,27 @@ const PORT = process.env.PORT || 3000;
 const URL = "http://localhost:";
 const httpServer = http.createServer(app);
 const io = new Server(httpServer);
+
+// Socket 인증 미들웨어
+io.use((socket, next) => {
+  try {
+    const rawCookie = socket.request.headers.cookie;
+    if (!rawCookie) throw new Error("not cookie");
+
+    const cookies = cookie.parse(rawCookie);
+    const token = cookies.access_token;
+
+    if (!token) throw new Error("not token");
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    socket.user = decoded;
+    next();
+  } catch (err) {
+    console.log(err.name, err.message);
+    next(new Error("Socket 인증 실패"));
+  }
+});
+
 const startServer = async () => {
   try {
     // ✅ 1. MongoDB 연결

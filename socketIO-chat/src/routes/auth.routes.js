@@ -9,5 +9,5 @@ router.get("/login", authController.loginPage);
 router.get("/refresh", authController.refresh);
 router.get("/kakao", authController.kakaoLogin);
 router.get("/kakao/callback", authController.kakaoCallback);
-
+router.get("/tester", authController.testerLogin);
 export default router;

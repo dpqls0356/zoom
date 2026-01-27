@@ -23,7 +23,6 @@ export const createRoom = async (req, res) => {
   };
 
   const roomId = await chatService.createRoom(param);
-  console.log("result roomid", roomId);
 
   return res.redirect(`/chat/${roomId}`);
 };
@@ -35,23 +34,26 @@ export const enterRoom = async (req, res) => {
     userId: user.id,
     roomId: roomId,
   });
+  // console.log("enter room", message);
   switch (message.status) {
     case 403:
-      alert(message.message);
       return res.redirect("/chat/list");
     case 200:
+      // 방에 입장한다는 알림 보내기 + 해당 메세지 mongodb에 저장
       return res.render(`chat/room`, {
         messages: message.messages,
         participants: message.participants,
-        roomInfo: message.roomInfo,
+        room: message.roomInfo,
+        currentUserId: user.id,
       });
   }
 };
 
 export const getRoomList = async (req, res) => {
+  const user = getUserInfo(req.cookies.access_token);
   const rooms = await chatService.searchRoomList({
     type: "joined",
-    userId: req.cookies.userId,
+    userId: user.id,
   });
   return res.render("chat/list", {
     rooms,
@@ -63,13 +65,15 @@ export const getRoomList = async (req, res) => {
 
 export const searchRoomList = async (req, res) => {
   const { type, searchWord } = req.query;
-  const userId = req.cookies.userId;
+  const user = getUserInfo(req.cookies.access_token);
 
   const rooms = await chatService.searchRoomList({
     type,
     searchWord,
-    userId,
+    userId: user.id,
   });
 
   return res.status(200).send({ success: true, type, rooms });
 };
+
+export const sendMessage = async (req, res) => {};

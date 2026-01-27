@@ -3,6 +3,7 @@ import * as tokenService from "../services/token.service.js";
 import jwt from "jsonwebtoken";
 import * as userModel from "../models/mysql/user.model.js";
 import { setAuthCookies } from "../utils/cookie.util.js";
+import { getUserInfo } from "../utils/jwt.js";
 
 export const loginPage = (req, res) => {
   res.render("auth/login");
@@ -107,7 +108,6 @@ export const refresh = async (req, res) => {
     ip: req.ip, //리프레시 토큰 저장할 때 필요
   });
   if (result.type === "Fail") {
-    console.log(result.message);
     return res.redirect("/auth/login");
   }
   // console.log("before access Token: ", req.cookies.access_token);
@@ -119,4 +119,14 @@ export const refresh = async (req, res) => {
     ? req.query.redirect
     : "/chat/list";
   res.redirect(redirectUrl);
+};
+export const testerLogin = async (req, res) => {
+  const user = await userModel.findById("temp-user-uuid-001");
+  const tokens = await tokenService.createToken(user, {
+    userAgent: req.headers["user-agent"],
+    ip: req.ip,
+  });
+  setAuthCookies(res, tokens);
+
+  return res.redirect("/chat/list");
 };

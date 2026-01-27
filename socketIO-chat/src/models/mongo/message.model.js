@@ -12,7 +12,13 @@ const MessageSchema = new mongoose.Schema(
       type: String, // user.user_id (MariaDB)
       required: true,
     },
-
+    profileUrl: {
+      type: String, // user.user_id (MariaDB)
+    },
+    senderName: {
+      type: String, // user.user_id (MariaDB)
+      required: true,
+    },
     type: {
       type: String,
       enum: ["TEXT", "SYSTEM"],
@@ -26,7 +32,7 @@ const MessageSchema = new mongoose.Schema(
   },
   {
     timestamps: true, // createdAt, updatedAt 자동 생성
-  }
+  },
 );
 
 export default mongoose.model("Message", MessageSchema);

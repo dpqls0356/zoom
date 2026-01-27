@@ -7,10 +7,11 @@ html(lang="en")
         link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer")
         link(rel="stylesheet" href="https://unpkg.com/scss-reset/reset.css")
         title YE_TALK
+        script(src="/socket.io/socket.io.js") 
     body
         main.main_layout
             div.resize_alarm
                 span
             div.layout_block
                 block layout 
-    script(src="/js/layoutTracking.js")
+        script(src="/js/layoutTracking.js")

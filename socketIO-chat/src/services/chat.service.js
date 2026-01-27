@@ -1,8 +1,7 @@
-import axios from "axios";
 import prisma from "../../prisma/client.js";
 import crypto from "crypto";
-import Message from "../models/mongo/message.model.js";
-import { join } from "path";
+import Message from "../models/mongo/message.model";
+
 export const createRoom = async (roomData) => {
   const id = crypto.randomBytes(64).toString("hex");
   const result = await prisma.$transaction(async (tx) => {
@@ -26,57 +25,89 @@ export const createRoom = async (roomData) => {
 };
 
 export const enterRoom = async ({ userId, roomId }) => {
-  // 1. 이 유저가 이 방에 들어올 권한이 있는가?
-  // 2. 이 유저가 언제 들어왔는가? (joined_at)
-  // 3. 그 시점 이후의 메시지를 "일부만" 가져오기
-  const joinInfo = await prisma.user_chat_rooms.findUnique({
-    where: {
-      user_id_room_id: {
-        user_id: userId,
-        room_id: roomId,
+  //1. 존재하는 방인가
+  //2. 기존 구성원인가
+  // 참가자들 + 메세지 일부를 받아 리턴
+  //3. 기존 구성원이 아님
+  // -> 입장 가능 여부 따지기 (인원 수)
+  // -> 가능하면 참가자 정보만 받아서 리턴
+  return await prisma.$transaction(async (tx) => {
+    //1
+    const room = await prisma.chat_rooms.findUnique({
+      where: { id: roomId },
+      select: {
+        max_users: true,
+        number_of_participant: true,
       },
-    },
-  });
-  if (!joinInfo) {
-    return {
-      status: 403,
-      message: "Not a participant",
-    };
-  }
+    });
 
-  const participants = await prisma.user_chat_rooms.findMany({
-    where: { room_id: roomId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          nickname: true,
-          profile_url: true,
+    if (!room) {
+      throw new Error("ROOM_NOT_FOUND");
+    }
+    //2
+    let joinInfo = await prisma.user_chat_rooms.findUnique({
+      where: {
+        user_id_room_id: {
+          user_id: userId,
+          room_id: roomId,
         },
       },
-    },
-  });
+    });
+    //3
+    if (!joinInfo) {
+      if (room.number_of_participant >= room.max_users) {
+        throw new Error("ROOM_FULL");
+      }
+      await tx.chat_rooms.update({
+        where: { id: roomId },
+        data: {
+          number_of_participant: {
+            increment: 1,
+          },
+        },
+      });
+      joinInfo = await tx.user_chat_rooms.create({
+        data: {
+          user_id: userId,
+          room_id: roomId,
+        },
+      });
+      //입장 안내메세지 넣기
+    }
 
-  const roomInfo = await prisma.chat_rooms.findUnique({
-    where: {
-      id: roomId,
-    },
-  });
-  const messages = await Message.find({
-    roomId,
-    createdAt: { $gte: joinInfo.joined_at },
-  })
-    .sort({ createdAt: -1 }) //최신순
-    .limit(30) // 30개만
-    .lean(); //순수 JS 객체 -> 성능 향상
+    const participants = await prisma.user_chat_rooms.findMany({
+      where: { room_id: roomId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            nickname: true,
+            profile_url: true,
+          },
+        },
+      },
+    });
 
-  console.log("messages ", messages);
-  return {
-    status: 200,
-    participants: participants.map((p) => p.user),
-    messages,
-    roomInfo,
-  };
+    const roomInfo = await prisma.chat_rooms.findUnique({
+      where: {
+        id: roomId,
+      },
+    });
+    const messages = await Message.find({
+      roomId,
+      createdAt: { $gte: joinInfo.joined_at },
+    })
+      .sort({ createdAt: -1, _id: -1 }) //최신순
+      .limit(50) // 30개만
+      .lean();
+
+    return {
+      status: 200,
+      participants: participants.map((p) => p.user),
+      messages: messages.reverse(),
+      roomInfo,
+    };
+  });
 };
 export const searchRoomList = async ({ type, searchWord, userId }) => {
   switch (type) {
@@ -112,4 +143,8 @@ export const searchRoomList = async ({ type, searchWord, userId }) => {
       return rooms;
     }
   }
+};
+
+export const saveMessage = async (message) => {
+  return Message.create(message);
 };

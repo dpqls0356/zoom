@@ -2,4 +2,32 @@ extends ../layout/blank.pug
 block header 
     include ../partials/header/chatRoomHeader.pug
 block content
-    div.chat-room-view hello
+    div.chat-room
+        div.chatting-list
+            //- div.chat.chat-other
+            //-     div.profile
+            //-         img(src="../img/test1.png")
+            //-     div.content
+            //-         div.message 안녕하세요 테스트용 메세지입니다.
+            //-         div.time 오후 12:45 
+            //- div.chat.chat-me
+                div.content
+                    div.message 안녕하세요 테스트용 메세지입니다.
+                    div.time 오전 12:45
+        form.chat-form()
+            div.photo
+                label(for="photo")
+                    svg(width=25 height=25  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6")
+                        path(fill-rule="evenodd" clip-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z")
+                input.photo-input(id="photo" type="file" name="photo" style="display:none;")
+            div.text-area
+                input.text-input(type="text")
+                btn.send-btn
+                    svg(width=25 height=25 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6")
+                        path(d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z")
+        script.
+            window.CURRENT_USER_ID = "#{currentUserId}";
+            window.MESSAGES = !{JSON.stringify(messages)};
+            window.PARTICIPANTS = !{JSON.stringify(participants)};
+            window.ROOM = !{JSON.stringify(room)};
+        script(type="module" src="/js/chat/chat.js")

@@ -15,4 +15,5 @@ router.get("/list", chatController.getRoomList);
 router.get("/search_room", chatController.searchRoomList);
 // 채팅방 입장
 router.get("/:id", chatController.enterRoom);
+router.get("/chat/send", chatController.sendMessage);
 export default router;

@@ -1,63 +1,76 @@
+import { formatKoreanTime } from "../utils/date.js";
 const socket = io();
+const backBtn = document.querySelector(".header--chatroom-info .left");
+const sendBtn = document.querySelector(".send-btn");
+const path = window.location.pathname.split("/");
+const roomId = path[path.length - 1];
 
-const chatTitle = document.querySelector("#chat_title");
-const chatArea = document.querySelector("#room");
-const chatList = chatArea.querySelector("#chat_list");
-const chatForm = chatArea.querySelector("form");
-const roomExitPopup = document.querySelector("#exit_popup");
-const openPopup = document.querySelector("#exit_popup_open_btn");
-
-const roomId = location.pathname.split("/").pop();
-socket.emit("enter_room", { roomId }, ({ roomName }) => {
-  chatTitle.innerHTML = roomName;
-});
-
-openPopup.addEventListener("click", () => {
-  roomExitPopup.style.display = "block";
-});
-
-//나가기 취소
-document.querySelector("#cancle_btn").addEventListener("click", () => {
-  roomExitPopup.style.display = "none";
-});
-//나가기
-document.querySelector("#exit_btn").addEventListener("click", () => {
-  socket.emit("exit_pre", { roomId }, () => {
-    socket.emit("exit", { roomId }, () => {
-      window.location.href = "/";
-    });
+const connectSocket = async () => {
+  socket.on("connect", () => {
+    console.log("socket connected:", socket.id);
+    socket.emit("chat:join", { roomId });
   });
-});
-
-// 메세지 전송
-const addMessage = (msg) => {
-  const li = document.createElement("li");
-  li.innerHTML = msg;
-  chatList.appendChild(li);
 };
-const sendMessage = (event) => {
+// 메세지 전달 함수
+const sendMessage = async (event) => {
   event.preventDefault();
-  const message = chatForm.querySelector("input").value;
-  chatForm.querySelector("input").value = "";
-  if (!message) return;
 
-  socket.emit("sendMessageToServer", { roomId, message }, () => {
-    const li = document.createElement("li");
-    li.innerHTML = "나: " + message;
-    chatList.appendChild(li);
+  const text = document.querySelector(".text-input");
+  if (!text.value) return;
+
+  socket.emit("chat:send", {
+    roomId: roomId,
+    message: text.value,
+  });
+  text.value = "";
+};
+// 메세지 수신 함수
+const receiveMessage = async () => {
+  socket.on("chat:receive", (data) => {
+    const message = data.message;
+    renderMessage(message);
   });
 };
-chatForm.addEventListener("submit", sendMessage);
 
-// 누군가 들어온 경우
-socket.on("welcome", () => {
-  const div = document.createElement("div");
-  div.innerHTML = "입장하셨습니다.";
-  chatList.appendChild(div);
+//메세지 렌더
+const renderMessage = (messages) => {
+  const chatList = document.querySelector(".chatting-list");
+  const currentUserId = window.CURRENT_USER_ID;
+  console.log(messages);
+  messages.forEach((message) => {
+    const isMe = currentUserId === message.senderId ? true : false;
+    const chat = `
+    <div class="chat ${isMe ? "chat-me" : "chat-other"}">
+      ${
+        !isMe
+          ? `
+            <div class="profile">
+              <img src="${message.profileUrl === null ? "/img/user.png" : message.profileUrl}" />
+            </div>
+          `
+          : ""
+      }
+      <div class="content">
+        <div class="message">${message.content}</div>
+        <div class="time">${formatKoreanTime(message.createdAt)}</div>
+      </div>
+    </div>
+  `;
+    chatList.insertAdjacentHTML("beforeend", chat);
+  });
+};
+
+//뒤로가기
+backBtn.addEventListener("click", () => {
+  window.history.back();
 });
-socket.on("sendMessageToUser", ({ message }) => {
-  addMessage(`상대방: ${message}`);
-});
-socket.on("bye", () => {
-  addMessage("참가자가 떠났습니다.");
-});
+
+//메세지 전송
+sendBtn.addEventListener("click", sendMessage);
+
+//소켓연결 및 등록
+connectSocket();
+receiveMessage(); // 연결 후에 등록이 필요
+const messages = window.MESSAGES;
+console.log("messages : ", messages);
+renderMessage(messages);

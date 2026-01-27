@@ -1,10 +1,13 @@
 @use "base/variables";
 @use "layout/main_layout";
-@use "layout/base.scss";
+@use "layout/base";
+@use "layout/blank";
 @use "components/headers/default";
+@use "components/headers/roomlist_roominfo";
+@use "components/headers/chatroom_header";
 @use "pages/chat_room_list";
 @use "pages/chat_room_create";
-
+@use "pages/chat_room";
 .none {
   display: none !important;
 }

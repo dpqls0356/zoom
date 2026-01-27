@@ -97,7 +97,7 @@ function roomTemplate(room, type) {
         <div class="img">
             <img src="${room.profile_url}" />
         </div>
-        <div class="header">
+        <div class="roomlist-roominfo header">
             <div class="name">${room.room_name}</div>
             <div class="person">
                 <span>${room.number_of_participant} / ${room.max_users}</span>

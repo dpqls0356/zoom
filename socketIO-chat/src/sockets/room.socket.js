@@ -1,3 +1,4 @@
+import * as chatService from "../services/chat.service";
 export default function registerRoomSocket(io, socket) {
   // 1️⃣ 채팅방에 처음 입장
   socket.on("new-join-room", async ({ roomId }) => {
@@ -20,24 +21,28 @@ export default function registerRoomSocket(io, socket) {
   });
 
   // 2️⃣ 이미 참여한 채팅방 다시 들어오는 경우
-  socket.on("join-room", ({ roomId }) => {
+  socket.on("chat:join", ({ roomId }) => {
     socket.join(roomId);
-    console.log(`${socket.user.nickname} re-joined room ${roomId}`);
   });
 
   // 3️⃣ 채팅 메시지 전달
-  socket.on("chat-message", async ({ roomId, message }) => {
+  socket.on("chat:send", async ({ roomId, message }) => {
     try {
       // DB에 메시지 저장 가능
-
+      const messgageInfo = await chatService.saveMessage({
+        senderId: socket.user.id,
+        roomId: roomId,
+        content: message,
+        senderName: socket.user.nickname,
+        type: "TEXT",
+        profileUrl: socket.user.profile_url,
+      });
       // 해당 룸 모든 참가자에게 메시지 브로드캐스트
-      io.to(roomId).emit("chat-message", {
-        nickname: socket.user.nickname,
-        message,
-        createdAt: new Date(),
+      io.to(roomId).emit("chat:receive", {
+        message: [messgageInfo],
       });
     } catch (err) {
-      console.error("Error in chat-message:", err);
+      console.error("Error in chat:send:", err);
     }
   });
 

@@ -102,30 +102,6 @@
       }
       .header {
         grid-area: title;
-        display: flex;
-        align-items: end;
-        text-align: center;
-        padding-left: 15px;
-
-        .name {
-          font-size: 18px;
-          font-weight: 600;
-          display: block;
-          white-space: nowrap; /* 줄바꿈 금지 */
-          text-overflow: ellipsis; /* ... 처리 */
-          overflow: hidden; /* 넘치는 부분 숨김 */
-        }
-        .person {
-          min-width: fit-content;
-          margin-left: 5px;
-          color: v.$purple;
-          font-weight: 800;
-          background-color: v.$light_purple;
-          border-radius: 10px;
-          justify-content: center;
-          padding: 2px 15px;
-          font-size: 13px;
-        }
       }
       .not-read-dot {
         grid-area: alarm;
