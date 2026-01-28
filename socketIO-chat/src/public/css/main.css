@@ -455,6 +455,18 @@
   display: flex;
   justify-content: end;
 }
+.chat-room .enterAlarm {
+  display: flex;
+  justify-content: center;
+  background-color: rgba(165, 165, 165, 0.1764705882);
+  border-radius: 10px;
+  padding: 4px 0px;
+  margin: 10px 0px;
+}
+.chat-room .enterAlarm .message {
+  color: rgb(62, 23, 55);
+  font-weight: 700;
+}
 
 .none {
   display: none !important;

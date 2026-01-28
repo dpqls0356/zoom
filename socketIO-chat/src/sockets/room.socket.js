@@ -1,20 +1,14 @@
 import * as chatService from "../services/chat.service";
 export default function registerRoomSocket(io, socket) {
   // 1️⃣ 채팅방에 처음 입장
-  socket.on("new-join-room", async ({ roomId }) => {
+  socket.on("chat:new-join", async ({ roomId }) => {
     try {
       socket.join(roomId);
-
-      // DB/서비스 레이어에서 참가자 상태 업데이트 가능
-
       // 다른 참가자들에게 입장 알림
-      socket.to(roomId).emit("user-joined", {
-        nickname: socket.user.nickname,
-        createdAt: new Date(),
+      socket.to(roomId).emit("chat:new-user", {
+        content: `${socket.user.nickname}님이 입장했습니다.`,
+        type: "SYSTEM",
       });
-
-      // 필요 시 서버 측 로그
-      console.log(`${socket.user.nickname} joined room ${roomId}`);
     } catch (err) {
       console.error("Error in new-join-room:", err);
     }

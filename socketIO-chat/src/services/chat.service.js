@@ -24,7 +24,7 @@ export const createRoom = async (roomData) => {
   return result; // 트랜잭션을 성공하면 id를 리턴하고 그게 result에 담김
 };
 
-export const enterRoom = async ({ userId, roomId }) => {
+export const enterRoom = async ({ userId, roomId, user }) => {
   //1. 존재하는 방인가
   //2. 기존 구성원인가
   // 참가자들 + 메세지 일부를 받아 리턴
@@ -32,6 +32,7 @@ export const enterRoom = async ({ userId, roomId }) => {
   // -> 입장 가능 여부 따지기 (인원 수)
   // -> 가능하면 참가자 정보만 받아서 리턴
   return await prisma.$transaction(async (tx) => {
+    let newJoin = false;
     //1
     const room = await prisma.chat_rooms.findUnique({
       where: { id: roomId },
@@ -55,6 +56,7 @@ export const enterRoom = async ({ userId, roomId }) => {
     });
     //3
     if (!joinInfo) {
+      newJoin = true;
       if (room.number_of_participant >= room.max_users) {
         throw new Error("ROOM_FULL");
       }
@@ -73,6 +75,14 @@ export const enterRoom = async ({ userId, roomId }) => {
         },
       });
       //입장 안내메세지 넣기
+      Message.insertOne({
+        roomId,
+        senderId: userId,
+        profileUrl: user.profile_url,
+        senderName: user.nickname,
+        type: "SYSTEM",
+        content: `${user.nickname}님이 입장했습니다.`,
+      });
     }
 
     const participants = await prisma.user_chat_rooms.findMany({
@@ -106,6 +116,7 @@ export const enterRoom = async ({ userId, roomId }) => {
       participants: participants.map((p) => p.user),
       messages: messages.reverse(),
       roomInfo,
+      newJoin,
     };
   });
 };

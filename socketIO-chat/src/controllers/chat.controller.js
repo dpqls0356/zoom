@@ -27,17 +27,19 @@ export const createRoom = async (req, res) => {
   return res.redirect(`/chat/${roomId}`);
 };
 
+// 특정 방 url에 들어온 경우 실행된다.
+// new join값에 따라 기존의 인원인지 아닌지 알 수 있음
+// 이걸 응답 받는 쪽[프론트]에서 파악해가지구 emit을 날리면 가능할 것 같음
 export const enterRoom = async (req, res) => {
   const roomId = req.params.id;
   const user = getUserInfo(req.cookies.access_token);
   const message = await chatService.enterRoom({
     userId: user.id,
     roomId: roomId,
+    user,
   });
-  // console.log("enter room", message);
+
   switch (message.status) {
-    case 403:
-      return res.redirect("/chat/list");
     case 200:
       // 방에 입장한다는 알림 보내기 + 해당 메세지 mongodb에 저장
       return res.render(`chat/room`, {
@@ -45,6 +47,7 @@ export const enterRoom = async (req, res) => {
         participants: message.participants,
         room: message.roomInfo,
         currentUserId: user.id,
+        newJoin: message.newJoin,
       });
   }
 };

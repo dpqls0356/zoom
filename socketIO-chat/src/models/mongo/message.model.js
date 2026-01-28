@@ -9,16 +9,19 @@ const MessageSchema = new mongoose.Schema(
     },
 
     senderId: {
-      type: String, // user.user_id (MariaDB)
+      type: String, // user.id (MariaDB)
       required: true,
     },
+
     profileUrl: {
-      type: String, // user.user_id (MariaDB)
+      type: String,
     },
+
     senderName: {
-      type: String, // user.user_id (MariaDB)
+      type: String,
       required: true,
     },
+
     type: {
       type: String,
       enum: ["TEXT", "SYSTEM"],
