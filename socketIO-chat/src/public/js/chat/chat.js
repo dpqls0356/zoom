@@ -81,12 +81,14 @@ backBtn.addEventListener("click", () => {
 //메세지 전송
 sendBtn.addEventListener("click", sendMessage);
 document.querySelector(".chat-form").addEventListener("keydown", (e) => {
-  console.log("hello");
+  if (e.isComposing) return; // 한글 조합 중이면 무시
+
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
-    sendMessage(); // socket emit
+    sendMessage();
   }
 });
+
 //소켓연결 및 등록
 connectSocket();
 receiveMessage(); // 연결 후에 등록이 필요

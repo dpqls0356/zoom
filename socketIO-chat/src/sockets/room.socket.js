@@ -40,12 +40,7 @@ export default function registerRoomSocket(io, socket) {
     }
   });
 
-  // 4️⃣ 채팅방 화면에서 나간 경우 (탭 종료 등)
-  socket.on("disconnect", () => {
-    console.log(`${socket.user?.nickname || "Unknown user"} disconnected`);
-  });
-
-  // 5️⃣ 채팅방에서 아예 강제 퇴장/나간 경우
+  //채팅방에서 아예 강제 퇴장/나간 경우
   socket.on("getout-room", async ({ roomId }) => {
     try {
       // DB에서 참가자 상태 제거 가능
