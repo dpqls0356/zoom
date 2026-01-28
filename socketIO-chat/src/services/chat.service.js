@@ -57,6 +57,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
     //3
     if (!joinInfo) {
       newJoin = true;
+      const enteredAt = new Date(); // 서버 기준
       if (room.number_of_participant >= room.max_users) {
         throw new Error("ROOM_FULL");
       }
@@ -72,6 +73,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
         data: {
           user_id: userId,
           room_id: roomId,
+          joined_at: enteredAt,
         },
       });
       //입장 안내메세지 넣기
@@ -82,6 +84,8 @@ export const enterRoom = async ({ userId, roomId, user }) => {
         senderName: user.nickname,
         type: "SYSTEM",
         content: `${user.nickname}님이 입장했습니다.`,
+        createdAt: enteredAt,
+        enteredAt: enteredAt,
       });
     }
 
