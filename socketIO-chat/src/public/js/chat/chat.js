@@ -5,6 +5,18 @@ const sendBtn = document.querySelector(".send-btn");
 const path = window.location.pathname.split("/");
 const roomId = path[path.length - 1];
 
+const isAtBottom = (el) => {
+  // scrollHeight : 전체 스크롤 가능한 높이 (보이지 않는 영역 포함)
+  // scrollTop    : 현재 스크롤이 위에서 얼마나 내려와 있는지
+  // clientHeight : 화면에 실제로 보이는 영역 높이
+
+  // (전체 높이 - 현재 스크롤 위치) <= (보이는 영역 + 여유값)
+  // → 현재 스크롤이 거의 맨 아래에 있다면 true
+  console.log(el.scrollHeight, " ", el.scrollTop, " ", el.clientHeight);
+  return el.scrollHeight - el.scrollTop <= el.clientHeight + 20;
+};
+
+//소켓 연결
 const connectSocket = async () => {
   socket.on("connect", () => {
     console.log("enter type: ", window.NEW_JOIN ? "new" : "not new");
@@ -41,6 +53,7 @@ const receiveMessage = async () => {
 const renderMessage = (messages) => {
   const chatList = document.querySelector(".chatting-list");
   const currentUserId = window.CURRENT_USER_ID;
+  const shouldScroll = isAtBottom(chatList);
   messages.forEach((message) => {
     if (message.type === "SYSTEM") {
       const chat = `
@@ -71,6 +84,9 @@ const renderMessage = (messages) => {
       chatList.insertAdjacentHTML("beforeend", chat);
     }
   });
+  if (shouldScroll) {
+    chatList.scrollTop = chatList.scrollHeight;
+  }
 };
 
 //메세지 전송
@@ -89,3 +105,10 @@ connectSocket();
 receiveMessage(); // 연결 후에 등록이 필요
 const messages = window.MESSAGES;
 renderMessage(messages);
+
+const closeModalBtn = document.querySelector(".close-modal");
+closeModalBtn.addEventListener("click", () => {
+  console.log("click");
+  document.querySelector(".chat-room").classList.remove("none");
+  document.querySelector(".room-side").classList.add("none");
+});
