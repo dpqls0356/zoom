@@ -1,6 +1,6 @@
 import { formatKoreanTime } from "../utils/date.js";
 const socket = io();
-const backBtn = document.querySelector(".header--chatroom-info .left");
+
 const sendBtn = document.querySelector(".send-btn");
 const path = window.location.pathname.split("/");
 const roomId = path[path.length - 1];
@@ -72,11 +72,6 @@ const renderMessage = (messages) => {
     }
   });
 };
-
-//뒤로가기
-backBtn.addEventListener("click", () => {
-  window.history.back();
-});
 
 //메세지 전송
 sendBtn.addEventListener("click", sendMessage);
