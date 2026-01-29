@@ -18,6 +18,8 @@
 
 .background--blank {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .header--default {
@@ -125,6 +127,39 @@
 .header--chatroom-info .right {
   display: flex;
   justify-content: end;
+}
+
+.checking-modal {
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.392);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.checking-modal .modal-box {
+  background-color: white;
+  padding: 30px;
+}
+.checking-modal .modal-box .content {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.checking-modal .modal-box .buttons {
+  display: flex;
+  justify-content: space-around;
+}
+.checking-modal .modal-box .modal-btn {
+  background-color: rgb(255, 228, 228);
+  border-radius: 10px;
+  width: 40%;
+  aspect-ratio: 2/1;
+  text-align: center;
 }
 
 .chatroom-list {
@@ -344,18 +379,19 @@
 .chat-room {
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   position: relative;
-  padding-bottom: 10%;
 }
 .chat-room .chat-form {
+  background-color: white;
   width: 100%;
-  height: 10%;
-  position: fixed;
+  min-height: 90px;
   display: flex;
   align-items: center;
   bottom: 0;
-  padding: 20px 30px;
+  padding: 0px 30px;
   border-top-right-radius: 30px;
   border-top-left-radius: 30px;
   box-shadow: 2px 0px 15px rgba(165, 165, 165, 0.4549019608);
@@ -387,11 +423,13 @@
 }
 .chat-room .chatting-list {
   overflow-y: auto;
-  flex: 1;
-  padding: 10px 15px;
+  height: 100%;
+  padding: 10px 15px 5px 15px;
+}
+.chat-room .chatting-list > div {
+  margin: 10px 0px;
 }
 .chat-room .chat {
-  padding-bottom: 20px;
   display: flex;
 }
 .chat-room .chat .message {
@@ -408,6 +446,7 @@
   color: #afacb9;
 }
 .chat-room .chat-other .profile {
+  flex-shrink: 0;
   width: 50px;
   height: 50px;
   margin-right: 15px;
@@ -461,11 +500,92 @@
   background-color: rgba(165, 165, 165, 0.1764705882);
   border-radius: 10px;
   padding: 4px 0px;
-  margin: 10px 0px;
 }
 .chat-room .enterAlarm .message {
   color: rgb(62, 23, 55);
   font-weight: 700;
+}
+
+.room-side {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  align-items: center;
+  top: 0;
+  padding: 10px 20px 30px 20px;
+}
+.room-side .header {
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+}
+.room-side .room-info {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.room-side .room-info .room-profile {
+  width: 40%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.room-side .room-info .room-profile img {
+  aspect-ratio: 1/1;
+  object-fit: cover;
+}
+.room-side .room-info .room-name {
+  margin-top: 30px;
+  font-weight: 700;
+  font-size: 20px;
+}
+.room-side .room-info .room-hashTag {
+  margin-top: 10px;
+}
+.room-side .participants-list {
+  background-color: white;
+  border-radius: 20px;
+  width: 100%;
+  margin: 20px;
+  padding: 20px;
+  font-size: 16px;
+  flex: 1;
+}
+.room-side .participants-list .list-header {
+  display: flex;
+  padding-bottom: 10px;
+  border-bottom: 0.2px solid rgb(126, 126, 126);
+}
+.room-side .participants-list .list-header > div {
+  margin-right: 5px;
+}
+.room-side .participants-list .user-info {
+  display: flex;
+  align-items: center;
+  padding: 10px 0px;
+}
+.room-side .participants-list .user-info .user-profile {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.room-side .participants-list .user-info .user-name {
+  margin-left: 10px;
+}
+.room-side .side-room-btn {
+  padding: 15px 0px;
+  border-radius: 15px;
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgb(78, 0, 102);
+  background-color: rgb(208, 183, 234);
 }
 
 .none {

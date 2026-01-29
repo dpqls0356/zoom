@@ -7,7 +7,7 @@ export const createRoom = async (roomData) => {
   const result = await prisma.$transaction(async (tx) => {
     //채팅방 만들기
     const room = await tx.chat_rooms.create({
-      data: { id, ...roomData, number_of_participant: 1 },
+      data: { id, ...roomData },
     });
     if (room) {
       //유저에게 연결
@@ -23,7 +23,6 @@ export const createRoom = async (roomData) => {
   });
   return result; // 트랜잭션을 성공하면 id를 리턴하고 그게 result에 담김
 };
-
 export const enterRoom = async ({ userId, roomId, user }) => {
   //1. 존재하는 방인가
   //2. 기존 구성원인가
@@ -39,6 +38,11 @@ export const enterRoom = async ({ userId, roomId, user }) => {
       select: {
         max_users: true,
         number_of_participant: true,
+        _count: {
+          select: {
+            participants: true, // ✅ 현재 인원 수
+          },
+        },
       },
     });
 
@@ -58,17 +62,10 @@ export const enterRoom = async ({ userId, roomId, user }) => {
     if (!joinInfo) {
       newJoin = true;
       const enteredAt = new Date(); // 서버 기준
-      if (room.number_of_participant >= room.max_users) {
+      if (room._count.user_chat_rooms >= room.max_users) {
         throw new Error("ROOM_FULL");
       }
-      await tx.chat_rooms.update({
-        where: { id: roomId },
-        data: {
-          number_of_participant: {
-            increment: 1,
-          },
-        },
-      });
+
       joinInfo = await tx.user_chat_rooms.create({
         data: {
           user_id: userId,
@@ -85,7 +82,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
         type: "SYSTEM",
         content: `${user.nickname}님이 입장했습니다.`,
         createdAt: enteredAt,
-        enteredAt: enteredAt,
+        updatedAt: enteredAt,
       });
     }
 
@@ -145,6 +142,13 @@ export const searchRoomList = async ({ type, searchWord, userId }) => {
           room_name: { contains: searchWord },
           participants: { some: { user_id: userId } },
         },
+        include: {
+          _count: {
+            select: {
+              participants: true,
+            },
+          },
+        },
       });
       return rooms;
     }
@@ -154,12 +158,44 @@ export const searchRoomList = async ({ type, searchWord, userId }) => {
           room_name: { contains: searchWord },
           participants: { none: { user_id: userId } },
         },
+        include: {
+          _count: {
+            select: {
+              participants: true,
+            },
+          },
+        },
       });
       return rooms;
     }
   }
 };
-
 export const saveMessage = async (message) => {
   return Message.create(message);
+};
+export const leaveRoom = async ({ roomId, userId, user }) => {
+  const result = await prisma.$transaction(async (tx) => {
+    //해당 유저가 해당 방을 가지고 있는지 확인
+    const participant = await tx.user_chat_rooms.findUnique({
+      where: { user_id_room_id: { user_id: userId, room_id: roomId } },
+    });
+    // 위에 조건이 맞다면 user_chat_rooms에서 지우기
+    if (!participant) throw new Error("Not a participant");
+    await tx.user_chat_rooms.delete({
+      where: { user_id_room_id: { user_id: userId, room_id: roomId } },
+    });
+    // mongo에 퇴장메세지 보내기
+    Message.insertOne({
+      roomId,
+      senderId: userId,
+      profileUrl: user.profile_url,
+      senderName: user.nickname,
+      type: "SYSTEM",
+      content: `${user.nickname}님이 퇴장했습니다.`,
+    });
+    return {
+      status: 200,
+    };
+  });
+  return result;
 };

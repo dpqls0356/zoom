@@ -1,4 +1,5 @@
 import { formatKoreanTime } from "../utils/date.js";
+import { confirmModal } from "../modal.js";
 const socket = io();
 
 const sendBtn = document.querySelector(".send-btn");
@@ -46,6 +47,11 @@ const receiveMessage = async () => {
   socket.on("chat:new-user", (data) => {
     console.log("new-user:", data);
     renderMessage([data]);
+  });
+  socket.on("leave-room", (data) => {
+    console.log("leave-user: ", data);
+    renderMessage([data]);
+    window.location.href = "/chat/list";
   });
 };
 
@@ -106,9 +112,34 @@ receiveMessage(); // 연결 후에 등록이 필요
 const messages = window.MESSAGES;
 renderMessage(messages);
 
-const closeModalBtn = document.querySelector(".close-modal");
-closeModalBtn.addEventListener("click", () => {
+//사이드바 열기
+const closeSideBtn = document.querySelector(".close-side");
+closeSideBtn.addEventListener("click", () => {
   console.log("click");
   document.querySelector(".chat-room").classList.remove("none");
   document.querySelector(".room-side").classList.add("none");
 });
+
+//채팅방 나가기 관련 이벤트
+const exitBtn = document.querySelector(".exit-btn");
+if (exitBtn) {
+  exitBtn.addEventListener("click", () => {
+    confirmModal.open({
+      message: "채팅방을 나가시겠습니까?",
+      onConfirm: () => {
+        socket.emit("leave-room", {
+          roomId,
+        });
+      },
+    });
+  });
+}
+const deleteBtn = document.querySelector(".delete-btn");
+if (deleteBtn) {
+  deleteBtn.addEventListener("click", () => {
+    confirmModal.open({
+      message: "채팅방을 삭제하겠습니까?",
+      onConfirm: () => {},
+    });
+  });
+}

@@ -92,6 +92,7 @@ function renderRooms(rooms, type) {
 }
 
 function roomTemplate(room, type) {
+  console.log(room);
   return `
       <div class="room-content" data-id="${room.id}">
         <div class="img">
@@ -100,7 +101,7 @@ function roomTemplate(room, type) {
         <div class="roomlist-roominfo header">
             <div class="name">${room.room_name}</div>
             <div class="person">
-                <span>${room.number_of_participant} / ${room.max_users}</span>
+                <span>${room._count.participants} / ${room.max_users}</span>
             </div>
         </div>
         <div class="not-read-dot"></div>

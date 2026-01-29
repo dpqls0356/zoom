@@ -1,20 +1,12 @@
 extends ../layout/blank.pug
+block modal 
+    include ../components/modal.pug
 block header 
     include ../partials/header/chatRoomHeader.pug
 block content
     div.chat-room
-        div.chatting-list
-            //- div.chat.chat-other
-            //-     div.profile
-            //-         img(src="../img/test1.png")
-            //-     div.content
-            //-         div.message 안녕하세요 테스트용 메세지입니다.
-            //-         div.time 오후 12:45 
-            //- div.chat.chat-me
-                div.content
-                    div.message 안녕하세요 테스트용 메세지입니다.
-                    div.time 오전 12:45
-        form.chat-form()
+        div.chatting-list.scroll-y-hidden
+        form.chat-form
             div.photo
                 label(for="photo")
                     svg(width=25 height=25  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6")
@@ -22,7 +14,7 @@ block content
                 input.photo-input(id="photo" type="file" name="photo" style="display:none;")
             div.text-area
                 input.text-input(type="text")
-                btn.send-btn
+                button.send-btn
                     svg(width=25 height=25 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6")
                         path(d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z")
         script.
@@ -31,4 +23,26 @@ block content
             window.PARTICIPANTS = !{JSON.stringify(participants)};
             window.ROOM = !{JSON.stringify(room)};
             window.NEW_JOIN = #{newJoin};
-        script(type="module" src="/js/chat/chat.js")
+    div.room-side.background--base.none
+        div.header
+            div.close-side
+                svg.header-purple(width="25" height="25" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6")
+                    path(stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18")
+        div.room-info
+            div.room-profile
+                img(src=`${room.profile_url}`)
+            div.room-name #{room.room_name}
+            div.room-hashTag #수다 #친목
+            div.participants-list
+                div.list-header 
+                    div 대화상대  
+                    div #{participants.length} 
+                for participant in participants
+                    div.user-info
+                        img.user-profile(src=participant.profile_url===null?"/img/user.png":participant.profile_url)
+                        div.user-name #{participant.nickname} 
+            if currentUserId !== room.owner_id
+                div.side-room-btn.exit-btn 나가기
+            else
+                div.side-room-btn.delete-btn 채팅방 삭제하기
+    script(type="module" src="/js/chat/chat.js")

@@ -41,17 +41,24 @@ export default function registerRoomSocket(io, socket) {
   });
 
   //채팅방에서 아예 강제 퇴장/나간 경우
-  socket.on("getout-room", async ({ roomId }) => {
+  socket.on("leave-room", async ({ roomId }) => {
+    console.log("leave");
     try {
       // DB에서 참가자 상태 제거 가능
-
-      // 룸 전체에 퇴장 알림
-      io.to(roomId).emit("getout-room", {
-        nickname: socket.user.nickname,
-        createdAt: new Date(),
+      const result = await chatService.leaveRoom({
+        roomId,
+        userId: socket.user.id,
+        user: socket.user,
       });
-
-      console.log(`${socket.user.nickname} got out of room ${roomId}`);
+      console.log(result);
+      if (result.status === 200) {
+        // 룸 전체에 퇴장 알림
+        io.to(roomId).emit("leave-room", {
+          nickname: socket.user.nickname,
+          type: "SYSTEM",
+          content: `${socket.user.nickname}님이 퇴장했습니다.`,
+        });
+      }
     } catch (err) {
       console.error("Error in getout-room:", err);
     }
