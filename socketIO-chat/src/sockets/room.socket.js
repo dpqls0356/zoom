@@ -54,7 +54,7 @@ export default function registerRoomSocket(io, socket) {
       if (result.status === 200) {
         // 룸 전체에 퇴장 알림
         io.to(roomId).emit("leave-room", {
-          nickname: socket.user.nickname,
+          userId: socket.user.id,
           type: "SYSTEM",
           content: `${socket.user.nickname}님이 퇴장했습니다.`,
         });

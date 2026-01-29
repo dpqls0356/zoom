@@ -51,7 +51,8 @@ const receiveMessage = async () => {
   socket.on("leave-room", (data) => {
     console.log("leave-user: ", data);
     renderMessage([data]);
-    window.location.href = "/chat/list";
+    if (data.userId === window.CURRENT_USER_ID)
+      window.location.href = "/chat/list";
   });
 };
 
