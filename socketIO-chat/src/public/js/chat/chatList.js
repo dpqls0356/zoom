@@ -58,7 +58,6 @@ const getRoomList = async (type) => {
 function renderRooms(rooms, type) {
   const emptybox = document.querySelector(".empty");
   const roomList = document.querySelector(".room-list");
-  console.log(rooms.length);
   if (rooms.length === 0) {
     emptybox.classList.remove("none");
     roomList.classList.add("none");
@@ -92,7 +91,6 @@ function renderRooms(rooms, type) {
 }
 
 function roomTemplate(room, type) {
-  console.log(room);
   return `
       <div class="room-content" data-id="${room.id}">
         <div class="img">

@@ -33,7 +33,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
   return await prisma.$transaction(async (tx) => {
     let newJoin = false;
     //1
-    const room = await prisma.chat_rooms.findUnique({
+    const room = await tx.chat_rooms.findUnique({
       where: { id: roomId },
       select: {
         max_users: true,
@@ -50,7 +50,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
       throw new Error("ROOM_NOT_FOUND");
     }
     //2
-    let joinInfo = await prisma.user_chat_rooms.findUnique({
+    let joinInfo = await tx.user_chat_rooms.findUnique({
       where: {
         user_id_room_id: {
           user_id: userId,
@@ -86,7 +86,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
       });
     }
 
-    const participants = await prisma.user_chat_rooms.findMany({
+    const participants = await tx.user_chat_rooms.findMany({
       where: { room_id: roomId },
       include: {
         user: {
@@ -98,8 +98,9 @@ export const enterRoom = async ({ userId, roomId, user }) => {
         },
       },
     });
+    //뢔 여기서 들어간 사람의 정보는 가져오지 못하는 것일까
 
-    const roomInfo = await prisma.chat_rooms.findUnique({
+    const roomInfo = await tx.chat_rooms.findUnique({
       where: {
         id: roomId,
       },
