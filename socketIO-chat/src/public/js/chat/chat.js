@@ -1,5 +1,6 @@
 import { formatKoreanTime } from "../utils/date.js";
 import { confirmModal } from "../modal.js";
+const axios = window.axios;
 const socket = io();
 
 const sendBtn = document.querySelector(".send-btn");
@@ -20,7 +21,6 @@ const isAtBottom = (el) => {
 const lockChat = () => {
   isRoomDeleted = true;
   sendBtn.disabled = true;
-  chatForm.disabled = true;
   document.querySelector(".text-input").disabled = true;
 };
 
@@ -36,6 +36,7 @@ const connectSocket = async () => {
 };
 // 메세지 전달 함수
 const sendMessage = async () => {
+  if (isRoomDeleted) return;
   const text = document.querySelector(".text-input");
   if (!text.value) return;
 
@@ -55,17 +56,20 @@ const receiveMessage = async () => {
     console.log("new-user:", data);
     renderMessage([data]);
     //참가자 정보 다시 불러오기
+    getParticipants();
   });
   socket.on("leave-room", (data) => {
-    console.log("leave-user: ", data);
     renderMessage([data]);
     if (data.userId === currentUserId) window.location.href = "/chat/list";
+    else {
+      getParticipants();
+    }
   });
   socket.on("success-delete-room", (data) => {
     if (data.userId === currentUserId) window.location.href = "/chat/list";
     else if (window.location.pathname === `/chat/${data.roomId}`) {
       lockChat();
-
+      getParticipants();
       confirmModal.open({
         message: "채팅방이 삭제되었습니다.",
         rightConfirm: () => {
@@ -121,7 +125,7 @@ const renderMessage = (messages) => {
 };
 
 //메세지 전송
-sendBtn.addEventListener("click", () => {
+sendBtn.addEventListener("click", (e) => {
   if (isRoomDeleted) {
     e.preventDefault();
     return;
@@ -138,10 +142,9 @@ chatForm.addEventListener("keydown", (e) => {
   }
 });
 
-//사이드바 열기
+//사이드바 닫기
 const closeSideBtn = document.querySelector(".close-side");
 closeSideBtn.addEventListener("click", () => {
-  console.log("click");
   document.querySelector(".chat-room").classList.remove("none");
   document.querySelector(".room-side").classList.add("none");
 });
@@ -183,7 +186,38 @@ if (deleteBtn) {
     });
   });
 }
-console.log(window.STATUS);
+
+// 유저정보 다시 불러오기
+export const getParticipants = async () => {
+  const participantList = document.querySelector(".participants-list .list");
+
+  const response = await axios.get(`/chat/participants?roomId=${roomId}`);
+  const participants = response.data.participants;
+  // 1. 기존 자식 전부 제거
+  participantList.innerHTML = "";
+
+  // 2. participants 만큼 DOM 생성 후 추가
+  participants.forEach((participant) => {
+    const userInfo = document.createElement("div");
+    userInfo.className = "user-info";
+
+    const img = document.createElement("img");
+    img.className = "user-profile";
+    img.src = participant.user.profile_url
+      ? participant.user.profile_url
+      : "/img/user.png";
+
+    const userName = document.createElement("div");
+    userName.className = "user-name";
+    userName.textContent = participant.user.nickname;
+
+    userInfo.appendChild(img);
+    userInfo.appendChild(userName);
+
+    participantList.appendChild(userInfo);
+  });
+};
+
 const messages = window.MESSAGES;
 const currentUserId = window.CURRENT_USER_ID;
 
@@ -191,7 +225,6 @@ const currentUserId = window.CURRENT_USER_ID;
 connectSocket();
 receiveMessage(); // 연결 후에 등록이 필요
 renderMessage(messages);
-
 if (window.STATUS === 410) {
   //모달 띄우기
   lockChat();

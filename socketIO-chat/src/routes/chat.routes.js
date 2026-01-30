@@ -13,7 +13,7 @@ router.post(
 // 채팅방 리스트
 router.get("/list", chatController.getRoomList);
 router.get("/search_room", chatController.searchRoomList);
-// 채팅방 입장
+router.get("/participants", chatController.getParticipants);
+router.get("/send", chatController.sendMessage);
 router.get("/:id", chatController.enterRoom);
-router.get("/chat/send", chatController.sendMessage);
 export default router;

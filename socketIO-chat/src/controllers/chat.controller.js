@@ -60,7 +60,7 @@ export const getRoomList = async (req, res) => {
     type: "joined",
     userId: user.id,
   });
-  console.log(rooms);
+  console.log(req.user);
   return res.render("chat/list", {
     rooms,
     type: "joined",
@@ -83,3 +83,18 @@ export const searchRoomList = async (req, res) => {
 };
 
 export const sendMessage = async (req, res) => {};
+
+export const getParticipants = async (req, res, next) => {
+  try {
+    const { roomId } = req.query;
+    if (!roomId) {
+      return res.status(400).json({ message: "roomId required" });
+    }
+
+    const participants = await chatService.getParticipants(roomId);
+    return res.json({ participants });
+  } catch (err) {
+    console.error("getParticipants error:", err);
+    next(err);
+  }
+};

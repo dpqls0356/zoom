@@ -244,3 +244,20 @@ export const deleteRoom = async ({ roomId, userId }) => {
   });
   return result;
 };
+
+export const getParticipants = ({ roomId }) => {
+  const participants = prisma.user_chat_rooms.findMany({
+    where: { room_id: roomId },
+    select: {
+      user: {
+        select: {
+          id: true,
+          nickname: true,
+          profile_url: true,
+        },
+      },
+    },
+  });
+
+  return participants;
+};

@@ -37,11 +37,12 @@ block content
             div.participants-list
                 div.list-header 
                     div 대화상대  
-                    div #{participants.length} 
-                for participant in participants
-                    div.user-info
-                        img.user-profile(src=participant.profile_url===null?"/img/user.png":participant.profile_url)
-                        div.user-name #{participant.nickname} 
+                    div #{participants.length}
+                div.list 
+                    for participant in participants
+                        div.user-info
+                            img.user-profile(src=participant.profile_url===null?"/img/user.png":participant.profile_url)
+                            div.user-name #{participant.nickname} 
             if currentUserId !== room.owner_id
                 div.side-room-btn.exit-btn 나가기
             else

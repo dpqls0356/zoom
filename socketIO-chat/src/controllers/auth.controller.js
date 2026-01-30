@@ -87,6 +87,7 @@ export const join = async (req, res, next) => {
 };
 
 export const logout = async (req, res) => {
+  console.log("logout");
   const refreshToken = req.cookies.refresh_token;
   if (refreshToken) {
     userModel.logout(refreshToken);
