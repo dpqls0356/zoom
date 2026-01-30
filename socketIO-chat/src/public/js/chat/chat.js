@@ -5,6 +5,8 @@ const socket = io();
 const sendBtn = document.querySelector(".send-btn");
 const path = window.location.pathname.split("/");
 const roomId = path[path.length - 1];
+const chatForm = document.querySelector(".chat-form");
+let isRoomDeleted = false;
 
 const isAtBottom = (el) => {
   // scrollHeight : 전체 스크롤 가능한 높이 (보이지 않는 영역 포함)
@@ -13,8 +15,13 @@ const isAtBottom = (el) => {
 
   // (전체 높이 - 현재 스크롤 위치) <= (보이는 영역 + 여유값)
   // → 현재 스크롤이 거의 맨 아래에 있다면 true
-  console.log(el.scrollHeight, " ", el.scrollTop, " ", el.clientHeight);
   return el.scrollHeight - el.scrollTop <= el.clientHeight + 20;
+};
+const lockChat = () => {
+  isRoomDeleted = true;
+  sendBtn.disabled = true;
+  chatForm.disabled = true;
+  document.querySelector(".text-input").disabled = true;
 };
 
 //소켓 연결
@@ -47,19 +54,36 @@ const receiveMessage = async () => {
   socket.on("chat:new-user", (data) => {
     console.log("new-user:", data);
     renderMessage([data]);
+    //참가자 정보 다시 불러오기
   });
   socket.on("leave-room", (data) => {
     console.log("leave-user: ", data);
     renderMessage([data]);
-    if (data.userId === window.CURRENT_USER_ID)
-      window.location.href = "/chat/list";
+    if (data.userId === currentUserId) window.location.href = "/chat/list";
+  });
+  socket.on("success-delete-room", (data) => {
+    if (data.userId === currentUserId) window.location.href = "/chat/list";
+    else if (window.location.pathname === `/chat/${data.roomId}`) {
+      lockChat();
+
+      confirmModal.open({
+        message: "채팅방이 삭제되었습니다.",
+        rightConfirm: () => {
+          socket.emit("leave-room", { roomId });
+        },
+        leftConfirm: () => {
+          chatForm.confirmModal.close();
+        },
+        leftBtnText: "닫기",
+        rightBtnText: "나가기",
+      });
+    }
   });
 };
 
 //메세지 렌더
 const renderMessage = (messages) => {
   const chatList = document.querySelector(".chatting-list");
-  const currentUserId = window.CURRENT_USER_ID;
   const shouldScroll = isAtBottom(chatList);
   messages.forEach((message) => {
     if (message.type === "SYSTEM") {
@@ -97,8 +121,15 @@ const renderMessage = (messages) => {
 };
 
 //메세지 전송
-sendBtn.addEventListener("click", sendMessage);
-document.querySelector(".chat-form").addEventListener("keydown", (e) => {
+sendBtn.addEventListener("click", () => {
+  if (isRoomDeleted) {
+    e.preventDefault();
+    return;
+  }
+  sendMessage();
+});
+chatForm.addEventListener("keydown", (e) => {
+  if (isRoomDeleted) return;
   if (e.isComposing) return; // 한글 조합 중이면 무시
 
   if (e.key === "Enter" && !e.shiftKey) {
@@ -106,12 +137,6 @@ document.querySelector(".chat-form").addEventListener("keydown", (e) => {
     sendMessage();
   }
 });
-
-//소켓연결 및 등록
-connectSocket();
-receiveMessage(); // 연결 후에 등록이 필요
-const messages = window.MESSAGES;
-renderMessage(messages);
 
 //사이드바 열기
 const closeSideBtn = document.querySelector(".close-side");
@@ -127,11 +152,16 @@ if (exitBtn) {
   exitBtn.addEventListener("click", () => {
     confirmModal.open({
       message: "채팅방을 나가시겠습니까?",
-      onConfirm: () => {
+      rightConfirm: () => {
         socket.emit("leave-room", {
           roomId,
         });
       },
+      leftConfirm: () => {
+        confirmModal.close();
+      },
+      leftBtnText: "취소",
+      rightBtnText: "확인",
     });
   });
 }
@@ -140,7 +170,42 @@ if (deleteBtn) {
   deleteBtn.addEventListener("click", () => {
     confirmModal.open({
       message: "채팅방을 삭제하겠습니까?",
-      onConfirm: () => {},
+      rightConfirm: () => {
+        socket.emit("delete-room", {
+          roomId,
+        });
+      },
+      leftConfirm: () => {
+        confirmModal.close();
+      },
+      leftBtnText: "취소",
+      rightBtnText: "삭제",
     });
   });
+}
+console.log(window.STATUS);
+const messages = window.MESSAGES;
+const currentUserId = window.CURRENT_USER_ID;
+
+//소켓연결 및 등록
+connectSocket();
+receiveMessage(); // 연결 후에 등록이 필요
+renderMessage(messages);
+
+if (window.STATUS === 410) {
+  //모달 띄우기
+  lockChat();
+
+  confirmModal.open({
+    message: "삭제된 채팅방입니다.",
+    rightConfirm: () => {
+      socket.emit("leave-room", { roomId });
+    },
+    leftConfirm: () => {
+      confirmModal.close();
+    },
+    leftBtnText: "닫기",
+    rightBtnText: "나가기",
+  });
+  //input disable하게 바꾸기
 }

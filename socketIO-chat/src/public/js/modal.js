@@ -1,31 +1,32 @@
 class ConfirmModal {
   //모달을 한 번만 생성해서 계속 재사용하기 위함
   constructor() {
-    this.modal = document.querySelector(".checking-modal");
+    this.modal = document.querySelector(".default-modal");
     this.content = this.modal.querySelector(".content");
-    this.okBtn = this.modal.querySelector(".ok-btn");
-    this.cancelBtn = this.modal.querySelector(".cancel-btn");
+    this.rightBtn = this.modal.querySelector(".right-btn");
+    this.leftBtn = this.modal.querySelector(".left-btn");
 
     //인 버튼을 눌렀을 때 실행할 콜백 함수 저장소
-    this.okHandler = null;
+    this.leftBtnHandler = null;
+    this.rightBtnHandler = null;
 
-    this.cancelBtn.addEventListener("click", () => this.close());
+    this.rightBtn.addEventListener("click", () => this.rightBtnHandler());
 
-    this.okBtn.addEventListener("click", () => {
-      if (this.okHandler) this.okHandler();
-      this.close();
+    this.leftBtn.addEventListener("click", () => {
+      this.leftBtnHandler();
     });
   }
 
-  open({ message, onConfirm }) {
+  open({ message, leftConfirm, rightConfirm, leftBtnText, rightBtnText }) {
     this.content.textContent = message;
-    this.okHandler = onConfirm;
+    this.leftBtnHandler = leftConfirm;
+    this.rightBtnHandler = rightConfirm;
     this.modal.classList.remove("none");
+    this.leftBtn.textContent = leftBtnText;
+    this.rightBtn.textContent = rightBtnText;
   }
-
   close() {
     this.modal.classList.add("none");
-    this.okHandler = null;
   }
 }
 

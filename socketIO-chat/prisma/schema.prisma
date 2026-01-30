@@ -16,6 +16,8 @@ model chat_rooms {
   profile_url           String?           @db.VarChar(255)
   room_name             String            @db.VarChar(50)
   number_of_participant Int               @default(0)
+  status                chat_rooms_status @default(ACTIVE)
+  deleted_at            DateTime?         @db.DateTime(0)
   owner                 users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
   participants          user_chat_rooms[]
 
@@ -57,4 +59,9 @@ model users {
   chat_rooms      chat_rooms[]
   refresh_tokens  refresh_tokens[]
   user_chat_rooms user_chat_rooms[]
+}
+
+enum chat_rooms_status {
+  ACTIVE
+  DELETED
 }

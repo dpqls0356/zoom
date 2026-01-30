@@ -129,7 +129,7 @@
   justify-content: end;
 }
 
-.checking-modal {
+.default-modal {
   height: 100vh;
   width: 100vw;
   position: absolute;
@@ -142,19 +142,19 @@
   justify-content: center;
   align-items: center;
 }
-.checking-modal .modal-box {
+.default-modal .modal-box {
   background-color: white;
   padding: 30px;
 }
-.checking-modal .modal-box .content {
+.default-modal .modal-box .content {
   text-align: center;
   margin-bottom: 18px;
 }
-.checking-modal .modal-box .buttons {
+.default-modal .modal-box .buttons {
   display: flex;
   justify-content: space-around;
 }
-.checking-modal .modal-box .modal-btn {
+.default-modal .modal-box .modal-btn {
   background-color: rgb(255, 228, 228);
   border-radius: 10px;
   width: 40%;

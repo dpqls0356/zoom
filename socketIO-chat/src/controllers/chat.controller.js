@@ -41,8 +41,10 @@ export const enterRoom = async (req, res) => {
 
   switch (message.status) {
     case 200:
+    case 410:
       // 방에 입장한다는 알림 보내기 + 해당 메세지 mongodb에 저장
       return res.render(`chat/room`, {
+        status: message.status,
         messages: message.messages,
         participants: message.participants,
         room: message.roomInfo,
@@ -58,6 +60,7 @@ export const getRoomList = async (req, res) => {
     type: "joined",
     userId: user.id,
   });
+  console.log(rooms);
   return res.render("chat/list", {
     rooms,
     type: "joined",

@@ -42,7 +42,6 @@ export default function registerRoomSocket(io, socket) {
 
   //채팅방에서 아예 강제 퇴장/나간 경우
   socket.on("leave-room", async ({ roomId }) => {
-    console.log("leave");
     try {
       // DB에서 참가자 상태 제거 가능
       const result = await chatService.leaveRoom({
@@ -60,7 +59,25 @@ export default function registerRoomSocket(io, socket) {
         });
       }
     } catch (err) {
-      console.error("Error in getout-room:", err);
+      console.error("Error in leave-room:", err);
+    }
+  });
+
+  socket.on("delete-room", async ({ roomId }) => {
+    try {
+      const result = await chatService.deleteRoom({
+        roomId,
+        userId: socket.user.id,
+      });
+      console.log(result);
+      if (result.status === 200) {
+        io.to(roomId).emit("success-delete-room", {
+          roomId,
+          userId: socket.user.id,
+        });
+      }
+    } catch (err) {
+      console.log("Error in delete-room: ", err);
     }
   });
 }

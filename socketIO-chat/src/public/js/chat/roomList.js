@@ -92,7 +92,7 @@ function renderRooms(rooms, type) {
 
 function roomTemplate(room, type) {
   return `
-      <div class="room-content" data-id="${room.id}">
+      <div class="room-content" data-id="${room.id}" >
         <div class="img">
             <img src="${room.profile_url}" />
         </div>

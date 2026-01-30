@@ -58,8 +58,15 @@ export const enterRoom = async ({ userId, roomId, user }) => {
         },
       },
     });
-    //3
+
     if (!joinInfo) {
+      if (room.status === "DELETED") {
+        return {
+          status: 404,
+          messages: [{ content: "잘못된 접근입니다." }],
+        };
+      }
+
       newJoin = true;
       const enteredAt = new Date(); // 서버 기준
       if (room._count.user_chat_rooms >= room.max_users) {
@@ -104,6 +111,13 @@ export const enterRoom = async ({ userId, roomId, user }) => {
       where: {
         id: roomId,
       },
+      include: {
+        _count: {
+          select: {
+            participants: true, // ✅ 현재 인원 수
+          },
+        },
+      },
     });
     const messages = await Message.find({
       roomId,
@@ -113,8 +127,9 @@ export const enterRoom = async ({ userId, roomId, user }) => {
       .limit(50) // 30개만
       .lean();
 
+    console.log(room.status);
     return {
-      status: 200,
+      status: joinInfo && roomInfo.status === "DELETED" ? 410 : 200,
       participants: participants.map((p) => p.user),
       messages: messages.reverse(),
       roomInfo,
@@ -138,6 +153,7 @@ export const searchRoomList = async ({ type, searchWord, userId }) => {
       //     chat_rooms: true,
       //   },
       // });
+      //내가 참여 중인 모든 방 가져오기 -> 삭제 상태로 바뀌었어도 가져오기
       const rooms = await prisma.chat_rooms.findMany({
         where: {
           room_name: { contains: searchWord },
@@ -153,11 +169,13 @@ export const searchRoomList = async ({ type, searchWord, userId }) => {
       });
       return rooms;
     }
+    //내가 참여할 수 있는 모든 방 가쟈오기 / 삭제된 방은 필터링
     case "available": {
       const rooms = await prisma.chat_rooms.findMany({
         where: {
           room_name: { contains: searchWord },
           participants: { none: { user_id: userId } },
+          status: "ACTIVE",
         },
         include: {
           _count: {
@@ -193,6 +211,32 @@ export const leaveRoom = async ({ roomId, userId, user }) => {
       senderName: user.nickname,
       type: "SYSTEM",
       content: `${user.nickname}님이 퇴장했습니다.`,
+    });
+    return {
+      status: 200,
+    };
+  });
+  return result;
+};
+
+export const deleteRoom = async ({ roomId, userId }) => {
+  const result = await prisma.$transaction(async (tx) => {
+    const { count } = await tx.chat_rooms.updateMany({
+      where: {
+        id: roomId,
+        owner_id: userId,
+        status: "ACTIVE",
+      },
+      data: {
+        status: "DELETED",
+        deleted_at: new Date(),
+      },
+    });
+    if (count === 0) {
+      throw new Error("NOT_OWNER_OR_ALREADY_DELETED");
+    }
+    await tx.user_chat_rooms.delete({
+      where: { user_id_room_id: { user_id: userId, room_id: roomId } },
     });
     return {
       status: 200,
