@@ -132,3 +132,37 @@
     font-weight: 700;
   }
 }
+.side-bar {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  font-size: 18px;
+  font-weight: 700;
+  color: v.$black;
+  padding: 0px 20px;
+  .side-bar-header {
+    height: 100px;
+    display: flex;
+    align-items: center;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    padding: 10px 0px;
+    .user-name {
+      margin-left: 20px;
+    }
+  }
+  .sidebar-list {
+    display: flex;
+    flex-direction: column;
+    & > div {
+      padding: 10px 0px;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  }
+}

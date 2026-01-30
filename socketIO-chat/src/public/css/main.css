@@ -285,6 +285,41 @@
   font-weight: 700;
 }
 
+.side-bar {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  font-size: 18px;
+  font-weight: 700;
+  color: #383a40;
+  padding: 0px 20px;
+}
+.side-bar .side-bar-header {
+  height: 100px;
+  display: flex;
+  align-items: center;
+}
+.side-bar .user-info {
+  display: flex;
+  align-items: center;
+  padding: 10px 0px;
+}
+.side-bar .user-info .user-name {
+  margin-left: 20px;
+}
+.side-bar .sidebar-list {
+  display: flex;
+  flex-direction: column;
+}
+.side-bar .sidebar-list > div {
+  padding: 10px 0px;
+}
+.side-bar .sidebar-list a {
+  text-decoration: none;
+  color: inherit;
+}
+
 .create-chatroom {
   flex: 1;
   display: flex;

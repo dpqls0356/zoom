@@ -1,6 +1,6 @@
 extends ../layout/base.pug
 block header
-    include ../partials/header/chatlistHeader.pug
+    include ../partials/header/roomlistHeader.pug
 block content
     main.chatroom-list
         div.chatroom-serch
@@ -16,9 +16,18 @@ block content
             div.toggle-dot
         div.scroll-y-hidden.room-list#list
         div.empty
-        //- 데이터 없으면 x
-        //- 있으면 list 보여주기
-    script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")
+    div.side-bar.background--base.none
+        div.side-bar-header
+            svg.header-purple.close-sidebar-btn(width="25" height="25" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6")
+                path(stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18")
+        div.user-info
+            div.user-profile
+              img(src=user.profile_url || "/img/user.png")
+            div.user-name #{user.nickname}
+        div.sidebar-list
+            div.edit-userinfo 내 정보 수정
+            div.logout
+                a(href="/auth/logout") 로그아웃
     script(type="module" src="/js/chat/roomList.js")
     script(src="/js/headers/chatRoomListHeader.js")
 

@@ -28,7 +28,7 @@ export const create = async ({
 }) => {
   const [result] = await db.query(
     "INSERT INTO users (id,user_id,kakao_id, nickname,profile_url) VALUES (?,?,?, ?,?)",
-    [id, userId, kakaoId, nickname, profile_url]
+    [id, userId, kakaoId, nickname, profile_url],
   );
 
   return {
@@ -40,6 +40,7 @@ export const create = async ({
   };
 };
 
+//리프레시 토큰 무효화
 export const logout = async (refreshToken) => {
   await db.query("UPDATE refresh_tokens SET revoked = true WHERE token = ?", [
     refreshToken,
