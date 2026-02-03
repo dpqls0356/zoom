@@ -49,7 +49,6 @@ export default function registerRoomSocket(io, socket) {
         userId: socket.user.id,
         user: socket.user,
       });
-      console.log(result);
       if (result.status === 200) {
         // 룸 전체에 퇴장 알림
         io.to(roomId).emit("leave-room", {
@@ -69,7 +68,6 @@ export default function registerRoomSocket(io, socket) {
         roomId,
         userId: socket.user.id,
       });
-      console.log(result);
       if (result.status === 200) {
         io.to(roomId).emit("success-delete-room", {
           roomId,

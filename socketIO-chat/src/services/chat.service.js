@@ -1,9 +1,12 @@
 import prisma from "../../prisma/client.js";
 import crypto from "crypto";
 import Message from "../models/mongo/message.model";
-
-export const createRoom = async (roomData) => {
+import { parseTags } from "../utils/tag";
+export const createRoom = async (roomData, tagData) => {
   const id = crypto.randomBytes(64).toString("hex");
+  //태그 정제하기
+  const tags = parseTags(tagData);
+  console.log(parseTags(tagData));
   const result = await prisma.$transaction(async (tx) => {
     //채팅방 만들기
     const room = await tx.chat_rooms.create({
@@ -18,6 +21,25 @@ export const createRoom = async (roomData) => {
           joined_at: new Date(),
         },
       });
+      if (tags && tags.length !== 0) {
+      }
+      //태그 넣기
+      for (const tagName of tags) {
+        // 1️⃣ 태그 upsert (없으면 생성, 있으면 재사용)
+        const tag = await tx.tags.upsert({
+          where: { name: tagName },
+          update: {}, // 이미 있으면 아무것도 안 함
+          create: { name: tagName },
+        });
+
+        // 2️⃣ 방-태그 연결 (중복 방지)
+        await tx.chat_room_tag.create({
+          data: {
+            room_id: room.id,
+            tag_id: tag.id,
+          },
+        });
+      }
     }
     return id;
   });
@@ -127,7 +149,7 @@ export const enterRoom = async ({ userId, roomId, user }) => {
       .limit(50) // 30개만
       .lean();
 
-    console.log(room.status);
+    // console.log(room.status);
     return {
       status: joinInfo && roomInfo.status === "DELETED" ? 410 : 200,
       participants: participants.map((p) => p.user),

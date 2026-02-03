@@ -17,12 +17,11 @@ export const createRoom = async (req, res) => {
     room_name: roomData.roomName,
     owner_id: user.id,
     max_users: Number(roomData.maxPerson),
-    tag: roomData.roomTag,
     profile_url: profileUrl,
     created_at: new Date(),
   };
 
-  const roomId = await chatService.createRoom(param);
+  const roomId = await chatService.createRoom(param, roomData.roomTags);
 
   return res.redirect(`/chat/${roomId}`);
 };
@@ -60,7 +59,7 @@ export const getRoomList = async (req, res) => {
     type: "joined",
     userId: user.id,
   });
-  console.log(req.user);
+  // console.log(req.user);
   return res.render("chat/list", {
     rooms,
     type: "joined",

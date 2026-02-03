@@ -27,7 +27,7 @@ const lockChat = () => {
 //소켓 연결
 const connectSocket = async () => {
   socket.on("connect", () => {
-    console.log("enter type: ", window.NEW_JOIN ? "new" : "not new");
+    // console.log("enter type: ", window.NEW_JOIN ? "new" : "not new");
     if (window.NEW_JOIN) {
       socket.emit("chat:new-join", { roomId });
     }
@@ -53,7 +53,7 @@ const receiveMessage = async () => {
     renderMessage(message);
   });
   socket.on("chat:new-user", (data) => {
-    console.log("new-user:", data);
+    // console.log("new-user:", data);
     renderMessage([data]);
     //참가자 정보 다시 불러오기
     getParticipants();

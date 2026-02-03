@@ -11,13 +11,13 @@ model chat_rooms {
   id                    String            @id @db.Char(128)
   owner_id              String            @db.Char(128)
   max_users             Int
-  tag                   String?           @db.VarChar(50)
   created_at            DateTime?         @default(now()) @db.DateTime(0)
   profile_url           String?           @db.VarChar(255)
   room_name             String            @db.VarChar(50)
   number_of_participant Int               @default(0)
   status                chat_rooms_status @default(ACTIVE)
   deleted_at            DateTime?         @db.DateTime(0)
+  chat_room_tag         chat_room_tag[]
   owner                 users             @relation(fields: [owner_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_rooms_owner")
   participants          user_chat_rooms[]
 
@@ -59,6 +59,22 @@ model users {
   chat_rooms      chat_rooms[]
   refresh_tokens  refresh_tokens[]
   user_chat_rooms user_chat_rooms[]
+}
+
+model tags {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique(map: "name") @db.VarChar(50)
+  chat_room_tag chat_room_tag[]
+}
+
+model chat_room_tag {
+  room_id   String     @db.Char(128)
+  tag_id    Int
+  chat_room chat_rooms @relation(fields: [room_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_room_tag_room")
+  tag       tags       @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_chat_room_tag_tag")
+
+  @@id([room_id, tag_id])
+  @@index([tag_id], map: "idx_chat_room_tag_tag_id")
 }
 
 enum chat_rooms_status {
