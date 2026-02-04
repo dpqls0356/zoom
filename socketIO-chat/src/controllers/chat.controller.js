@@ -54,6 +54,7 @@ export const enterRoom = async (req, res) => {
 };
 
 export const getRoomList = async (req, res) => {
+  console.log("getRoom");
   const user = getUserInfo(req.cookies.access_token);
   const rooms = await chatService.searchRoomList({
     type: "joined",

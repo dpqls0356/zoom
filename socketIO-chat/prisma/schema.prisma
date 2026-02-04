@@ -22,6 +22,7 @@ model chat_rooms {
   participants          user_chat_rooms[]
 
   @@index([owner_id], map: "fk_chat_rooms_owner")
+  @@index([status, room_name], map: "idx_chat_rooms_status_room_name")
 }
 
 model refresh_tokens {
@@ -75,6 +76,7 @@ model chat_room_tag {
 
   @@id([room_id, tag_id])
   @@index([tag_id], map: "idx_chat_room_tag_tag_id")
+  @@index([tag_id, room_id], map: "idx_chat_room_tag_tag_id_room_id")
 }
 
 enum chat_rooms_status {

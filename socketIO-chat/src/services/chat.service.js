@@ -160,56 +160,49 @@ export const enterRoom = async ({ userId, roomId, user }) => {
   });
 };
 export const searchRoomList = async ({ type, searchWord, userId }) => {
-  switch (type) {
-    case "joined": {
-      // const rooms = await prisma.user_chat_rooms.findMany({
-      //   where: {
-      //     user_id: userId,
-      //     chat_rooms: {
-      //       name: { // 해당 컬럼에 검색어가 포함되어있는가
-      //         contains: searchWord,
-      //       },
-      //     },
-      //   },
-      //   include: {
-      //     chat_rooms: true,
-      //   },
-      // });
-      //내가 참여 중인 모든 방 가져오기 -> 삭제 상태로 바뀌었어도 가져오기
-      const rooms = await prisma.chat_rooms.findMany({
+  const tagIds = searchWord?.trim()
+    ? await prisma.tags.findMany({
         where: {
-          room_name: { contains: searchWord },
-          participants: { some: { user_id: userId } },
-        },
-        include: {
-          _count: {
-            select: {
-              participants: true,
-            },
+          name: {
+            startsWith: searchWord,
           },
         },
-      });
-      return rooms;
-    }
-    //내가 참여할 수 있는 모든 방 가쟈오기 / 삭제된 방은 필터링
-    case "available": {
-      const rooms = await prisma.chat_rooms.findMany({
-        where: {
-          room_name: { contains: searchWord },
-          participants: { none: { user_id: userId } },
-          status: "ACTIVE",
-        },
-        include: {
-          _count: {
-            select: {
-              participants: true,
+        select: { id: true },
+      })
+    : [];
+  const where = {
+    participants: {
+      [type === "joined" ? "some" : "none"]: { user_id: userId },
+    },
+  };
+  if (searchWord && searchWord.trim() !== "") {
+    where.OR = [
+      { room_name: { contains: searchWord } },
+      ...(tagIds.length > 0
+        ? [
+            {
+              chat_room_tag: {
+                some: {
+                  tag_id: {
+                    in: tagIds.map((t) => t.id),
+                  },
+                },
+              },
             },
-          },
-        },
-      });
-      return rooms;
-    }
+          ]
+        : []),
+    ];
   }
+  const rooms = await prisma.chat_rooms.findMany({
+    where,
+    include: {
+      _count: {
+        select: { participants: true },
+      },
+    },
+  });
+  console.log("rooms: ", rooms);
+  return rooms;
 };
 export const saveMessage = async (message) => {
   return Message.create(message);

@@ -4,19 +4,35 @@ const joinedBtn = document.querySelector(".joined");
 const availableBtn = document.querySelector(".available");
 const toggleDot = document.querySelector(".toggle-dot");
 const searchInput = document.querySelector(".chatroom-serch input");
+
 const JOINED = "joined";
 const AVAILABLE = "available";
+let barState = JOINED;
 
-// 검색어가 바뀔 때 검색어에 맞는 방 리스트 보여주기
-searchInput.addEventListener("change", () => {});
+let debounceTimer = null;
 
+function triggerSearch(keyword) {
+  if (keyword === "") {
+    getRoomList(barState);
+  }
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    if (!keyword.trim()) return;
+    getRoomList(barState, keyword);
+  }, 400);
+}
+
+searchInput.addEventListener("input", (e) => {
+  triggerSearch(e.target.value); // 영문 or 확정된 입력
+});
 // tab을 클릭한 경우 탭의 종류에 맞게 데이터 로드
 joinedBtn.addEventListener("click", async () => {
   availableBtn.classList.remove("focus");
   joinedBtn.classList.add("focus");
   moveDot(joinedBtn);
   try {
-    const rooms = await getRoomList(JOINED);
+    barState = JOINED;
+    await getRoomList(barState);
   } catch (e) {
     console.log("error : ", e);
   }
@@ -26,7 +42,8 @@ availableBtn.addEventListener("click", async () => {
   joinedBtn.classList.remove("focus");
   moveDot(availableBtn);
   try {
-    const rooms = await getRoomList(AVAILABLE);
+    barState = AVAILABLE;
+    await getRoomList(barState);
   } catch (e) {
     console.log("error : ", e);
   }
@@ -48,11 +65,15 @@ function moveDot(target) {
   toggleDot.style.left = `${leftPos}px`;
 }
 
-const getRoomList = async (type) => {
-  const reponse = await axios.get(
-    `/chat/search_room?searchWord=${searchInput.value}&type=${type}`,
-  );
-  renderRooms(reponse.data.rooms, type);
+const getRoomList = async (type, keyword) => {
+  const params = { type };
+
+  if (keyword) {
+    params.searchWord = keyword;
+  }
+
+  const response = await axios.get("/chat/search_room", { params });
+  renderRooms(response.data.rooms, type);
 };
 
 function renderRooms(rooms, type) {
